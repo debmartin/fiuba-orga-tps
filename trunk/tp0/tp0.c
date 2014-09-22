@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <math.h>
 #include <complex.h>
+#include "pgm.c"
 
 #define N 256
 
@@ -92,5 +93,7 @@ int main(int argc, const char* argv[]) {
 	num = sumar(num, num2);
 	printf("real %g \t %g", num->real, num->imaginario);
 
+	// Ejemplo de como crear pgm
+	exampleForPGM("hola.pgm");
 	return EXIT_SUCCESS;
 }
