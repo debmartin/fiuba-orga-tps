@@ -57,7 +57,7 @@ int main(int argc, char* argv[]){
         {"resolution", required_argument, 0, 'r'},
         {"center", required_argument, 0, 'c'},
         {"width", required_argument, 0, 'w'},
-        {"height", required_argument, 0, 'h'},
+        {"height", required_argument, 0, 'H'},
         {"output", required_argument, 0, 'o'}
     };
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
     char option;
     int option_index;
 
-    while ((option = getopt_long(argc, argv, "o:r:c:w:h:", long_options, &option_index)) != -1) {
+    while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
                 sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]);
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]){
             case 'w':
                 data.plane[0] = atoi(optarg);
                 break;
-            case 'h':
+            case 'H':
                 data.plane[1] = atoi(optarg);
                 break;
             case 'o':
