@@ -1,48 +1,36 @@
 // Based on http://zerocool.is-a-geek.net/simd-instructions-in-c-part-two/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <xmmintrin.h>
+#include "pgm.h"
+
 
 #define HI(num)	(((num) & 0x0000FF00) >> 8)
 #define LO(num)	((num) & 0x000000FF)
 
-typedef struct _PGMData {
-	int row;
-	int col;
-	int max_gray;
-	float **matrix;
-} PGMData;
 
-float ** allocate_dynamic_matrix(int row, int col);
-void deallocate_dynamic_matrix(float **matrix, int row);
-void SkipComments(FILE *fp);
-void writePGM(const char *filename, const PGMData *data);
 
-int exampleForPGM(const char * modified_fileName) {
-	PGMData pgm_image;
-	PGMData * data = &pgm_image;
-
-	data->col = 800;
-	data->row = 600;
-	data->max_gray = 255;
-	data->matrix = allocate_dynamic_matrix(data->row, data->col);
-
-	int i, j;
-	// Genero como ejemplo un gradiente de grises (i es el valor de la fila)
-	//data->matrix[4][4] = 255;
-	for (i = 0; i < data->row; ++i) {
-		for (j = 0; j < data->col; ++j) {
-			data->matrix[i][j] = i;
-		}
-	}
-
-	printf("Write to PGM ...\n");
-	writePGM(modified_fileName, data);
-	return 0;
-
-}
+//int exampleForPGM(const char * modified_fileName) {
+//	PGMData pgm_image;
+//	PGMData * data = &pgm_image;
+//
+//	data->col = 800;
+//	data->row = 600;
+//	data->max_gray = 255;
+//	data->matrix = allocate_dynamic_matrix(data->row, data->col);
+//
+//	int i, j;
+//	// Genero como ejemplo un gradiente de grises (i es el valor de la fila)
+//	//data->matrix[4][4] = 255;
+//	for (i = 0; i < data->row; ++i) {
+//		for (j = 0; j < data->col; ++j) {
+//			data->matrix[i][j] = i;
+//		}
+//	}
+//
+//	printf("Write to PGM ...\n");
+//	writePGM(modified_fileName, data);
+//	return 0;
+//
+//}
 
 float **allocate_dynamic_matrix(int row, int col) {
 
@@ -90,17 +78,9 @@ void SkipComments(FILE *fp) {
 
 }
 
-void writePGM(const char *filename, const PGMData *data) {
-
-	FILE *pgmFile;
+void writePGM(FILE *pgmFile, const PGMData *data) {
 	int i, j;
 	int lo;
-
-	pgmFile = fopen(filename, "wb");
-	if (pgmFile == NULL) {
-		perror("cannot open file to write");
-		exit(EXIT_FAILURE);
-	}
 
 	fprintf(pgmFile, "P5 ");
 	printf("col %d - row %d ", data->col, data->row);
@@ -113,7 +93,4 @@ void writePGM(const char *filename, const PGMData *data) {
 			lo = LO((int ) data->matrix[i][j]);
 			fputc(lo, pgmFile);
 		}
-
-	fclose(pgmFile);
-	deallocate_dynamic_matrix(data->matrix, data->row);
 }
