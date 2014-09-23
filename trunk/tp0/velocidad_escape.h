@@ -5,7 +5,7 @@ typedef struct pixel pixel_t;
 
 int velocidad_de_escape(pixel_t* pixel);
 
-pixel_t* crear_pixel(float real, float imaginaria);
+pixel_t* crear_pixel(double real, double imaginaria);
 
 void destruir_pixel(pixel_t* pixel);
 
