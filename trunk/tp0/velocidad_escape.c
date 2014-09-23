@@ -5,7 +5,7 @@
 
 #include "velocidad_escape.h"
 
-#define N 256
+#define N 255
 
 typedef struct num_complejo {
 	double real;
