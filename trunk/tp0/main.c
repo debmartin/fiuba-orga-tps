@@ -30,10 +30,10 @@ void generatePGM(OutputData* data){
     pgm_image.max_gray = 255;
     pgm_image.matrix = allocate_dynamic_matrix(pgm_image.row, pgm_image.col);
 
-    double first_real_value = DEFAULT_CENTER_REAL - ((float)DEFAULT_PLANE_WIDTH)/2;
-    double first_imaginary_value = DEFAULT_CENTER_IMAG + ((float)DEFAULT_PLANE_HEIGHT)/2;
-    double width_scale = (((float) DEFAULT_PLANE_WIDTH) / DEFAULT_RESOLUTION_WIDTH);
-    double height_scale =  - (((float) DEFAULT_PLANE_HEIGHT) / DEFAULT_RESOLUTION_HEIGHT);
+    double first_real_value = data->center[0] - ((float)data->plane[0])/2;
+    double first_imaginary_value = data->center[1] + ((float)data->plane[1])/2;
+    double width_scale = (((float) data->plane[0]) / data->resolution[0]);
+    double height_scale =  - (((float) data->plane[1]) / data->resolution[1]);
     first_real_value += width_scale/2;
     first_imaginary_value += height_scale/2;
 
