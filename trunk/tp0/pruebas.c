@@ -1,25 +1,29 @@
 #include <stdio.h>
 #include "pgm.h"
+#include "velocidad_escape.h"
+void pruebas_verificacion_de_argumentos(){
+	
+	//Probar: -H --height, y no -h o -height y así con todos.
+	//Probar: H, w, r con números negativos o ceros.
+	//Probar centro con formato no a+bi. Sólo a, sólo bi, cólo a+i, sólo i.
+	//Probar comandos vacíos.
+	//Probar archivo de salida no.pgm.
+	//Probar valores por defecto.
+	
+}
+
+void pruebas_conjunto_de_Mandelbrot(){
+	
+	// Probar los dos del ejemplo, y alguno de mis pruebas.
+	
+}
 
 int main(int argc, const char* argv[]) {
-	puts("!!!Prueba!!!");
+	
+	pruebas_verificacion_de_argumentos();
+	pruebas_conjunto_de_Mandelbrot();
 
-	printf("arg %d: %s\n", 1, argv[1]);
-
-	double complex dc1 = 3 + 2 * I;
-	double complex dc2 = -4 + 3 * I;
-	double complex result;
-
-	result = dc1 + dc2;
-
-	printf("%g + %g i\n", result);
-
-	complejo* num = crear_complejo(1, 5);
-	complejo* num2 = crear_complejo(2, 4);
-	num = sumar(num, num2);
-	printf("real %g \t %g", num->real, num->imaginario);
-
-	// Ejemplo de como crear pgm
-	exampleForPGM("hola.pgm");
-	return EXIT_SUCCESS;
+        // Ejemplo de como crear pgm
+        exampleForPGM("hola.pgm");
+        return EXIT_SUCCESS;
 }
