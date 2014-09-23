@@ -25,19 +25,21 @@ typedef struct _OutputData{
 
 void generatePGM(OutputData* data){
     PGMData pgm_image;
-    pgm_image.row = data->resolution[0];
-    pgm_image.col = data->resolution[1];
+    pgm_image.row = data->resolution[1];
+    pgm_image.col = data->resolution[0];
     pgm_image.max_gray = 255;
     pgm_image.matrix = allocate_dynamic_matrix(pgm_image.row, pgm_image.col);
 
-    double first_real_value = - ((float) data->plane[0])/2;
-    double first_imaginary_value = ((float)data->plane[1])/2;
-    double width_scale = (((float) data->plane[0]) / data->resolution[0]) / 2;
-    double height_scale =  - (((float) data->plane[1]) / data->resolution[1]) / 2;
+    double first_real_value = DEFAULT_CENTER_REAL - ((float)DEFAULT_PLANE_WIDTH)/2;
+    double first_imaginary_value = DEFAULT_CENTER_IMAG + ((float)DEFAULT_PLANE_HEIGHT)/2;
+    double width_scale = (((float) DEFAULT_PLANE_WIDTH) / DEFAULT_RESOLUTION_WIDTH);
+    double height_scale =  - (((float) DEFAULT_PLANE_HEIGHT) / DEFAULT_RESOLUTION_HEIGHT);
+    first_real_value += width_scale/2;
+    first_imaginary_value += height_scale/2;
 
     for(int i = 0; i < pgm_image.row; i++){
         for(int j = 0; j < pgm_image.col; j++){
-            pixel_t* pixel = crear_pixel(first_real_value + (i + 1) * width_scale, first_imaginary_value + (j + 1) * height_scale);
+            pixel_t* pixel = crear_pixel(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
             pgm_image.matrix[i][j] = velocidad_de_escape(pixel);
             destruir_pixel(pixel);
         }
