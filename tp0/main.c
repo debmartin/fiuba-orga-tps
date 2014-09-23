@@ -94,10 +94,10 @@ int main(int argc, char* argv[]){
                 }
                 break;
             case 'w':
-                data.plane[0] = atoi(optarg);
+                data.plane[0] = atof(optarg);
                 break;
             case 'H':
-                data.plane[1] = atoi(optarg);
+                data.plane[1] = atof(optarg);
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
