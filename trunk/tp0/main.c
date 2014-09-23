@@ -19,7 +19,7 @@
 typedef struct _OutputData{
     int resolution[2];
     float center[2];
-    int plane[2];
+    float plane[2];
     FILE* output;
 } OutputData;
 
