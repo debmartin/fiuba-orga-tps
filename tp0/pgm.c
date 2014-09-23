@@ -88,7 +88,7 @@ void writePGM(FILE *pgmFile, const PGMData *data) {
 
 	for (i = 0; i < data->row; ++i){
 		for (j = 0; j < data->col; ++j) {
-            fprintf(pgmFile, "%d ", data->matrix[i][j]);
+            fprintf(pgmFile, "%d ", data->matrix[data->row - i-1][j]);
 		}
 		fprintf(pgmFile, "\n");
 	}
