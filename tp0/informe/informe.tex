@@ -4,7 +4,7 @@
 \usepackage{amsmath}
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}	% Permite escribir directamente áéíóúñ
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{pdfpages}
 
 \title{ \textbf{ 6620. Organizaci\'on de Computadoras\\
@@ -28,13 +28,16 @@ Infraestructura B\'asica}}
 \maketitle
 \thispagestyle{empty}  % quita el nmero en la primer pagina
 
-\includepdf[pages={5}]{./Enunciado.pdf}
+\newpage
+\tableofcontents
+\newpage
+\includepdf[pages={-}]{./Enunciado.pdf}
 
 \begin{abstract}
 El presente trabajo tiene como objetivo familiarizarse con las herramientas de software que ser\'an usadas en los siguientes trabajos, implementando un programa en lenguaje C, y su correspondiente documentaci\'on, que resuelva el problema  planteado, que permita dibujar el conjunto de Mandelbrot y sus vecindades
 
 \end{abstract}
-\pagebreak
+
 
 
 
@@ -44,7 +47,6 @@ Al comenzar a utilizar nuevas herramientas, en cualquier \'ambito, es necesaria 
 Como primer objetivo en la materia, nos proponemos adentrarnos en el funcionamiento del emulador GXemul. Nuestra meta ser\'a emular una plataforma MIPS (ejecutando un sistema operativo NetBSD), para poder desde all\'i desarrollar programas en lenguaje C. Estos ser\'an compilados y ejecutados haciendo uso de la herramienta GCC (GNU Compiler Collection), mediante el cual tambi\'en ser\'a posible obtener, a posteriori, el c\'odigo MIPS32 del programa.\\
 Una vez cumplido este objetivo, aprenderemos los rudimientos de \LaTeX{} para generar la documentaci\'on relevante al trabajo pr\'actico.
 
-\pagebreak
 
 
 
@@ -58,7 +60,7 @@ habr\'a  dibujado el fractal en el archivo de salida.
 El formato gr\'afico a usar es PGM o portable gray map, un formato simple para describir im\'agenes a
  digitales monocrom\'aticas.
 
-\pagebreak
+
 
 
 
@@ -86,7 +88,6 @@ Este archivo maneja la estructura y operaciones entre n\'umeros complejos necesa
 \subsubsection{velocidad\_de\_escape}
 Devuelve velocidad de escape seg\'un el complejo que reciba. Este valor define una intensidad seg\'un la condici\'on de corte.
 
-\pagebreak
 
 
 
@@ -252,7 +253,6 @@ El primero es correcto: OK
 El segundo es correcto: OK
 \end{verbatim}
 
-\pagebreak
 
 
 \section{C\'odigo fuente C}
@@ -399,7 +399,6 @@ int main(int argc, char* argv[]){
 }
 
 \end{verbatim}
-\pagebreak
 
 \subsection{pgm.c}
 
@@ -473,7 +472,6 @@ void writePGM(FILE *pgmFile, const PGMData *data) {
 }
 
 \end{verbatim}
-\pagebreak
 
 \subsection{velocidad\_escape.c}
 
