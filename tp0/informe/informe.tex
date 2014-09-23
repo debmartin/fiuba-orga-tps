@@ -2,8 +2,10 @@
 
 \usepackage{graphicx}
 \usepackage{amsmath}
-\usepackage[latin1]{inputenc}
 \usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}	% Permite escribir directamente áéíóúñ
+\usepackage{hyperref}
+\usepackage{pdfpages}
 
 \title{ \textbf{ 6620. Organizaci\'on de Computadoras\\
 Trabajo Pr\'actico 0: \\
@@ -26,6 +28,7 @@ Infraestructura B\'asica}}
 \maketitle
 \thispagestyle{empty}  % quita el nmero en la primer pagina
 
+\includepdf[pages={5}]{./Enunciado.pdf}
 
 \begin{abstract}
 El presente trabajo tiene como objetivo familiarizarse con las herramientas de software que ser\'an usadas en los siguientes trabajos, implementando un programa en lenguaje C, y su correspondiente documentaci\'on, que resuelva el problema  planteado, que permita dibujar el conjunto de Mandelbrot y sus vecindades
@@ -93,14 +96,16 @@ Para generar el ejecutable del programa, debe correrse la siguiente sentencia en
 \begin{verbatim}
 $ gcc -Wall -pedantic --std=c99 -c velocidad_escape.c
 $ gcc -Wall -pedantic --std=c99 -c pgm.c
-$ gcc -Wall -pedantic --std=c99 velocidad_escape.o pgm.o main.c -o tp0
+$ gcc -Wall -pedantic --std=c99 velocidad_escape.o pgm.o \
+main.c -o tp0
 \end{verbatim}
 
 Para generar el c\'odigo MIPS32, debe ejecutarse lo siguiente:
 \begin{verbatim}
 $ gcc -Wall -S -pedantic --std=c99 -c velocidad_escape.c
 $ gcc -Wall -S -pedantic --std=c99 -c pgm.c
-$ gcc -Wall -S -pedantic --std=c99 velocidad_escape.o pgm.o main.c -o tp0
+$ gcc -Wall -S -pedantic --std=c99 velocidad_escape.o pgm.o \
+main.c -o tp0
 \end{verbatim}
 
 N\'otese que para ambos casos se han activado todos los mensajes de 'Warning' (-Wall). Adem\'as, para el caso de MIPS, se ha habilitado '-S', que detiene al compilador luego de generar el assembly.
@@ -111,7 +116,8 @@ N\'otese que para ambos casos se han activado todos los mensajes de 'Warning' (-
 
 \section{Corridas de prueba}
 
-En esta secci\'on se presentan algunas de las distintas corridas que se realizaron para probar el funcionamiento del trabajo pr\'actico.\\
+En esta secci\'on se presentan algunas de las distintas corridas que se 
+realizaron para probar el funcionamiento del trabajo pr\'actico.\\
 
 1. Generamos una imagen de 1 punto de lado, centrada en el or\'igen del plano complejo:
 \begin{verbatim}
@@ -172,7 +178,7 @@ fatal: invalid center specification: Undefined error: 0
 Se adjunta imagen de la corrida de pruebas.
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{pruebas.png}
+    \includegraphics[width=0.8\textwidth]{./Pruebas.png}
     \label{fig:Resultado de correr los casos de prueba antes mencionados}
     \caption{}
   \end{center}
@@ -185,7 +191,7 @@ Se adjunta imagen de la corrida de pruebas.
 Genera la siguiente imagen:
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{por_default.png}
+    \includegraphics[width=0.8\textwidth]{./por_default.png}
     \label{fig:Region barrida por defecto}
     \caption{}
   \end{center}
@@ -200,16 +206,17 @@ Genera la siguiente imagen:
 Genera la siguiente imagen:
 \begin{figure}
   \begin{center}
-    \includegraphics[width=0.8\textwidth]{zoom.png}
+    \includegraphics[width=0.8\textwidth]{./zoom.png}
     \label{fig:Region comprendida entre 0,2795 - 0,0075i y 0,2845 - 0,0125i}
     \caption{}
   \end{center}
 \end{figure}
 
 
-9. Se puede ver en la sección del código fuente otras pruebas unitarias hechas para probar la función de velocidad de escape en el archivo pruebas_escape.c.
+9. Se puede ver en la sección del código fuente otras pruebas unitarias hechas para probar la función de velocidad de escape en el archivo pruebas\_escape.c.
 \begin{verbatim}
-> gcc -Wall -pedantic --std=c99 velocidad_escape.o pruebas_escape.c -o prueba_escape
+> gcc -Wall -pedantic --std=c99 velocidad_escape.o \
+pruebas_escape.c -o prueba_escape
 > ./prueba_escape
 Vel de escape de 0+0i es 255: OK
 Vel de escape de 10+0i es 0: OK
@@ -218,9 +225,10 @@ Vel de escape de 0,5+0i es 4: OK
 Vel de escape de 1+0i es 2: OK
 \end{verbatim}
 
-10. De la misma forma para pruebas unitarias respecto a la lógica del escalamiento de la imagen, se tiene el archivo pruebas_escala.c.
+10. De la misma forma para pruebas unitarias respecto a la lógica del escalamiento de la imagen, se tiene el archivo pruebas\_escala.c.
 \begin{verbatim}
-> gcc -Wall -pedantic --std=c99 velocidad_escape.o pruebas_escala.c -o prueba_escala
+> gcc -Wall -pedantic --std=c99 velocidad_escape.o \
+pruebas_escala.c -o prueba_escala
 > ./prueba_escala
 Complejos para -c 0+0i -r 2x2 -w 4 -H 4:
 -1.000000 + 1.000000 i
@@ -293,7 +301,8 @@ void generatePGM(OutputData* data){
 
     for(int i = 0; i < pgm_image.row; i++){
         for(int j = 0; j < pgm_image.col; j++){
-            complejo* num = crear_complejo(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
+            complejo* num = crear_complejo(first_real_value + \
+            j * width_scale, first_imaginary_value + i * height_scale);
             pgm_image.matrix[i][j] = velocidad_de_escape(num);
             destruir_complejo(num);
         }
@@ -335,38 +344,47 @@ int main(int argc, char* argv[]){
     char option, i;
     int option_index;
 
-    while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
+    while ((option = getopt_long(argc, argv, "o:r:c:w:H:", \
+    long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
-                    return terminateError("fatal: invalid resolution specification");
+                if (sscanf(optarg, "%d%*c%d", &data.resolution[0],\
+                 &data.resolution[1]) != 2){
+                    return terminateError("fatal: \
+                    invalid resolution specification");
                 }
                 if (data.resolution[0] <= 0 || data.resolution[1] <= 0){
-                    return terminateError("Usage:\n\ttp0 -h\n\ttp0 -V\n");
+                    return terminateError("Usage:\
+                    \n\ttp0 -h\n\ttp0 -V\n");
                 }
                 break;
             case 'c':
-                if (sscanf(optarg, "%f%*c%f%c", &data.center[0], &data.center[1], &i) != 3 || i!='i'){
-                    return terminateError("fatal: invalid center specification");
+                if (sscanf(optarg, "%f%*c%f%c", &data.center[0],\
+                 &data.center[1], &i) != 3 || i!='i'){
+                    return terminateError("fatal: \
+                    invalid center specification");
                 }
                 break;
             case 'w':
                 data.plane[0] = atof(optarg);
                 if (data.plane[0] <= 0){
-                    return terminateError("fatal: invalid width specification");
+                    return terminateError("fatal: \
+                    invalid width specification");
                 }
                 break;
             case 'H':
                 data.plane[1] = atof(optarg);
                 if (data.plane[1] <= 0){
-                    return terminateError("fatal: invalid height specification");
+                    return terminateError("fatal: \
+                    invalid height specification");
                 }
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
                     data.output = fopen(optarg, "w");
                     if (! data.output){
-                        return terminateError("fatal: cannot open output file");
+                        return terminateError("fatal: \
+                        cannot open output file");
                     }
                     need_close = true;
                 }
@@ -386,8 +404,6 @@ int main(int argc, char* argv[]){
 \subsection{pgm.c}
 
 \begin{verbatim}
-// Based on http://zerocool.is-a-geek.net/simd-instructions-in-c-part-two/
-
 #include "pgm.h"
 
 
@@ -520,12 +536,14 @@ int velocidad_de_escape(complejo* num) {
 
 
 
-\subsection{pruebas_escala.c}
+\subsection{pruebas\_escala.c}
 \begin{verbatim}
 #include <stdio.h>
 #include "velocidad_escape.h"
 
-void imprimir_complejos_del_plano(double centro_real, double centro_imag, double ancho_plano, double alto_plano, int ancho_res, int alto_res, double* v){
+void imprimir_complejos_del_plano(double centro_real, \
+double centro_imag, double ancho_plano, double alto_plano, \
+int ancho_res, int alto_res, double* v){
 	
 	double first_real_value = centro_real - ((float)ancho_plano)/2;
     double first_imaginary_value = centro_imag + ((float)alto_plano)/2;
@@ -556,26 +574,34 @@ int main(){
 	printf("Complejos para -c 0+0i -r 2x2 -w 4 -H 4:\n");
     double v1[8];
     imprimir_complejos_del_plano(0, 0, 4, 4, 2, 2, v1);
-	printf("El primero es correcto: %s\n", ((v1[0] == -1) & (v1[1] == 1))? "OK" : "ERROR");
-	printf("El segundo es correcto: %s\n", ((v1[2] == 1) & (v1[3] == 1))? "OK" : "ERROR");
-	printf("El tercero es correcto: %s\n", ((v1[4] == -1) & (v1[5] == -1))? "OK" : "ERROR");
-	printf("El cuarto es correcto: %s\n", ((v1[6] == 1) & (v1[7] == -1))? "OK" : "ERROR");
+	printf("El primero es correcto: %s\n", \
+	((v1[0] == -1) & (v1[1] == 1))? "OK" : "ERROR");
+	printf("El segundo es correcto: %s\n", \
+	((v1[2] == 1) & (v1[3] == 1))? "OK" : "ERROR");
+	printf("El tercero es correcto: %s\n", \
+	((v1[4] == -1) & (v1[5] == -1))? "OK" : "ERROR");
+	printf("El cuarto es correcto: %s\n", \
+	((v1[6] == 1) & (v1[7] == -1))? "OK" : "ERROR");
 	
 	printf("Complejos para -c 10+0i -r 1x1 -w 4 -H 4:\n");
     double v2[2];
     imprimir_complejos_del_plano(10, 0, 4, 4, 1, 1, v2);
-	printf("El primero es correcto: %s\n", ((v2[0] == 10) & (v2[1] == 0))? "OK" : "ERROR");
+	printf("El primero es correcto: %s\n", \
+	((v2[0] == 10) & (v2[1] == 0))? "OK" : "ERROR");
 	
 	printf("Complejos para -c -3.5+1i -r 1x1 -w 4 -H 4:\n");
     double v3[2];
     imprimir_complejos_del_plano(-3.5, 1, 4, 4, 1, 1, v3);
-	printf("El primero es correcto: %s\n", ((v3[0] == - 3.5) & (v3[1] == 1))? "OK" : "ERROR");
+	printf("El primero es correcto: %s\n", \
+	((v3[0] == - 3.5) & (v3[1] == 1))? "OK" : "ERROR");
 	
 	printf("Complejos para -c 1-3i -r 2x1 -w 2 -H 3:\n");
     double v4[4];
     imprimir_complejos_del_plano(1, -3, 2, 3, 2, 1, v4);
-	printf("El primero es correcto: %s\n", ((v4[0] == 0.5) & (v4[1] == -3))? "OK" : "ERROR");
-	printf("El segundo es correcto: %s\n", ((v4[2] == 1.5) & (v4[3] == -3))? "OK" : "ERROR");
+	printf("El primero es correcto: %s\n", \
+	((v4[0] == 0.5) & (v4[1] == -3))? "OK" : "ERROR");
+	printf("El segundo es correcto: %s\n", \
+	((v4[2] == 1.5) & (v4[3] == -3))? "OK" : "ERROR");
 	
 	return 0;
 }
@@ -583,7 +609,7 @@ int main(){
 \end{verbatim}
 
 
-\subsection{pruebas_escala.c}
+\subsection{pruebas\_escala.c}
 \begin{verbatim}
 #include <stdio.h>
 #include "velocidad_escape.h"
@@ -591,23 +617,28 @@ int main(){
 int main(){
 	pixel_t* pixel1 = crear_pixel(0, 0);
 	int vel1 = velocidad_de_escape(pixel1);
-	printf("%s: %s\n", "Vel de escape de 0+0i es 255", (vel1 == 255)? "OK" : "ERROR");
+	printf("%s: %s\n", "Vel de escape de 0+0i es 255", \
+	(vel1 == 255)? "OK" : "ERROR");
 
 	pixel_t* pixel2 = crear_pixel(10, 0);
 	int vel2 = velocidad_de_escape(pixel2);
-	printf("%s: %s\n", "Vel de escape de 10+0i es 0", (vel2 == 0)? "OK" : "ERROR");
+	printf("%s: %s\n", "Vel de escape de 10+0i es 0", \
+	(vel2 == 0)? "OK" : "ERROR");
 	
    pixel_t* pixel3 = crear_pixel(-1, 0);
 	int vel3 = velocidad_de_escape(pixel3);
-	printf("%s: %s\n", "Vel de escape de -1+0i es 255", (vel3 == 255)? "OK" : "ERROR");
+	printf("%s: %s\n", "Vel de escape de -1+0i es 255", \
+	(vel3 == 255)? "OK" : "ERROR");
 	
 	pixel_t* pixel4 = crear_pixel(0.5, 0);
 	int vel4 = velocidad_de_escape(pixel4);
-	printf("%s: %s\n", "Vel de escape de 0,5+0i es 4", (vel4 == 4)? "OK" : "ERROR");
+	printf("%s: %s\n", "Vel de escape de 0,5+0i es 4", \
+	(vel4 == 4)? "OK" : "ERROR");
 	
 	pixel_t* pixel5 = crear_pixel(1, 0);
 	int vel5 = velocidad_de_escape(pixel5);
-	printf("%s: %s\n", "Vel de escape de 1+0i es 2", (vel5 == 2)? "OK" : "ERROR");
+	printf("%s: %s\n", "Vel de escape de 1+0i es 2", \
+	(vel5 == 2)? "OK" : "ERROR");
 }
 
 \end{verbatim}
@@ -625,22 +656,22 @@ Como conclusi\'on final, podemos considerar que hemos logrado obtener un buen ma
 
 \begin{thebibliography}{99}
 	
-\bibitem{GXEMUL} GXemul, http://gxemul.sourceforge.net/
+\bibitem{GXEMUL} GXemul, \url{http://gxemul.sourceforge.net/}
 
-\bibitem{NETBSD} The NetBSD Project, http://www.netbsd.org/
+\bibitem{NETBSD} The NetBSD Project, \url{http://www.netbsd.org/}
 
-\bibitem{MANDEL} Mandelbrot, http://en.wikipedia.org/wiki/Mandelbrot\_set/
+\bibitem{MANDEL} Mandelbrot, \url{http://en.wikipedia.org/wiki/Mandelbrot\_set/}
 
 \bibitem{MANSET}  Introduction to the Mandelbrot Set,
-http://www.olympus.net/personal/dewey/mandelbrot.html.
+\url{http://www.olympus.net/personal/dewey/mandelbrot.html}.
 
 \bibitem{MANEXT} Smooth shading for the Mandelbrot exterior.
-http://linas.org/art-gallery/escape/smooth.html. Linas Vepstas. October, 1997.
+\url{http://linas.org/art-gallery/escape/smooth.html}. Linas Vepstas. October, 1997.
 
 \bibitem{PGMFORMAT} PGM format specification.
-http://netpbm.sourceforge.net/doc/pgm.html.
+\url{http://netpbm.sourceforge.net/doc/pgm.html}
 
-\bibitem{LATEX} Oetiker, Tobias, "The Not So Short Introduction To LaTeX2", http://www.physics.udel.edu/$\sim$dubois/lshort2e/
+\bibitem{LATEX} Oetiker, Tobias, "The Not So Short Introduction To LaTeX2", \url{http://www.physics.udel.edu/$\sim$dubois/lshort2e/}
 
 \end{thebibliography}
 
