@@ -82,12 +82,6 @@ void writePGM(FILE *pgmFile, const PGMData *data) {
 	int i, j;
 	int lo;
 
-	fprintf(pgmFile, "P5 ");
-	printf("col %d - row %d ", data->col, data->row);
-	printf(" maxgray %d ", data->max_gray);
-	fprintf(pgmFile, "%d %d ", data->col, data->row);
-	fprintf(pgmFile, "%d ", data->max_gray);
-
 	for (i = 0; i < data->row; ++i)
 		for (j = 0; j < data->col; ++j) {
 			lo = LO((int ) data->matrix[i][j]);
