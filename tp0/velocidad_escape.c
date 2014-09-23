@@ -58,7 +58,7 @@ complejo* sumar(complejo* num1, complejo* num2) {
 }
 
 complejo* al_2(complejo* num) {
-	double real = num->real - num->imaginario;
+	double real = num->real * num->real - num->imaginario * num->imaginario;
 	double imaginario = 2 * num->real * num->imaginario;
 	return crear_complejo(real, imaginario);
 }
