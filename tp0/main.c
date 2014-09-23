@@ -89,7 +89,7 @@ int main(int argc, char* argv[]){
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0)
-                    data.output = fopen(optarg, "wb");
+                    data.output = fopen(optarg, "w");
                     if (! data.output){
                         perror("cannot open file to write");
                         exit(EXIT_FAILURE);
