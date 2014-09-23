@@ -8,15 +8,15 @@
 #define N 256
 
 typedef struct num_complejo {
-	float real;
-	float imaginario;
+	double real;
+	double imaginario;
 } complejo;
 
 struct pixel {
 	complejo* numero_complejo;
 };
 
-complejo* crear_complejo(float real, float imaginaria) {
+complejo* crear_complejo(double real, double imaginaria) {
 	complejo* num = malloc(sizeof(complejo));
 	if (num == NULL)
 		return NULL;
@@ -29,7 +29,7 @@ void destruir_complejo(complejo* num) {
 	free(num);
 }
 
-pixel_t* crear_pixel(float real, float imaginaria) {
+pixel_t* crear_pixel(double real, double imaginaria) {
 	pixel_t* pixel = malloc(sizeof(pixel));
 	if (pixel == NULL)
 		return NULL;
@@ -48,18 +48,18 @@ void destruir_pixel(pixel_t* pixel) {
 }
 
 unsigned int modulo_al_2(complejo* num) {
-	return pow(num->real, 2) + pow(num->imaginario, 2);
+	return (num->real * num->real) + (num->imaginario * num->imaginario);
 }
 
 complejo* sumar(complejo* num1, complejo* num2) {
-	float real = num1->real + num2->real;
-	float imaginario = num1->imaginario + num2->imaginario;
+	double real = num1->real + num2->real;
+	double imaginario = num1->imaginario + num2->imaginario;
 	return crear_complejo(real, imaginario);
 }
 
 complejo* al_2(complejo* num) {
-	float real = num->real - num->imaginario;
-	float imaginario = 2 * num->real * num->imaginario;
+	double real = num->real - num->imaginario;
+	double imaginario = 2 * num->real * num->imaginario;
 	return crear_complejo(real, imaginario);
 }
 
