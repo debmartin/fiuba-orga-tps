@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
                 }
                 break;
             case 'c':
-                if (sscanf(optarg, "%f+%f%c", &data.center[0], &data.center[1], &i) != 2 || i!='i'){
+                if (sscanf(optarg, "%f+%f%c", &data.center[0], &data.center[1], &i) != 3 || i!='i'){
                     return terminateError("fatal: invalid center specification");
                 }
                 break;
