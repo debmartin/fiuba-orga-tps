@@ -59,6 +59,11 @@ void OutputDataInitialize(OutputData* data){
     data->output = stdout;
 }
 
+int terminateError(char* errorMessaje){
+    perror(errorMessaje);
+    return EXIT_FAILURE;
+}
+
 int main(int argc, char* argv[]){
     static struct option long_options[] =
     {
@@ -78,26 +83,29 @@ int main(int argc, char* argv[]){
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1])){
-                    perror("fatal: invalid resolution specification");
-                    exit(EXIT_FAILURE);
+                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
+                    return terminateError("fatal: invalid resolution specification");
                 }
                 if (data.resolution[0] == 0 || data.resolution[1] == 0){
-                    perror("Usage:\n\ttp0 -h\n\ttp0 -V\n");
-                    exit(EXIT_FAILURE);
+                    return terminateError("Usage:\n\ttp0 -h\n\ttp0 -V\n");
                 }
                 break;
             case 'c':
                 if (sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]) != 2){
-                    perror("fatal: invalid center specification");
-                    exit(EXIT_FAILURE);
+                    return terminateError("fatal: invalid center specification");
                 }
                 break;
             case 'w':
                 data.plane[0] = atof(optarg);
+                if (data.plane[0] == 0){
+                    return terminateError("fatal: invalid width specification");
+                }
                 break;
             case 'H':
                 data.plane[1] = atof(optarg);
+                if (data.plane[1] == 0){
+                    return terminateError("fatal: invalid height specification");
+                }
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
