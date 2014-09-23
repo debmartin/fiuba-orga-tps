@@ -87,7 +87,7 @@ int main(int argc, char* argv[]){
                 if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
                     return terminateError("fatal: invalid resolution specification");
                 }
-                if (data.resolution[0] == 0 || data.resolution[1] == 0){
+                if (data.resolution[0] <= 0 || data.resolution[1] <= 0){
                     return terminateError("Usage:\n\ttp0 -h\n\ttp0 -V\n");
                 }
                 break;
@@ -98,13 +98,13 @@ int main(int argc, char* argv[]){
                 break;
             case 'w':
                 data.plane[0] = atof(optarg);
-                if (data.plane[0] == 0){
+                if (data.plane[0] <= 0){
                     return terminateError("fatal: invalid width specification");
                 }
                 break;
             case 'H':
                 data.plane[1] = atof(optarg);
-                if (data.plane[1] == 0){
+                if (data.plane[1] <= 0){
                     return terminateError("fatal: invalid height specification");
                 }
                 break;
