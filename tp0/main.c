@@ -82,6 +82,10 @@ int main(int argc, char* argv[]){
                     perror("fatal: invalid resolution specification");
                     exit(EXIT_FAILURE);
                 }
+                if (data.resolution[0] == 0 || data.resolution[1] == 0){
+                    perror("Usage:\n\ttp0 -h\n\ttp0 -V\n");
+                    exit(EXIT_FAILURE);
+                }
                 break;
             case 'c':
                 if (sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]) != 2){
