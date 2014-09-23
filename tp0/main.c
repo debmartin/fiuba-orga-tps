@@ -30,10 +30,10 @@ void generatePGM(OutputData* data){
     pgm_image.max_gray = 255;
     pgm_image.matrix = allocate_dynamic_matrix(pgm_image.row, pgm_image.col);
 
-    double first_real_value = data->center[0] - ((float)data->plane[0])/2;
-    double first_imaginary_value = data->center[1] + ((float)data->plane[1])/2;
-    double width_scale = (((float) data->plane[0]) / data->resolution[0]);
-    double height_scale =  - (((float) data->plane[1]) / data->resolution[1]);
+    double first_real_value = data->center[0] - data->plane[0]/2;
+    double first_imaginary_value = data->center[1] + data->plane[1]/2;
+    double width_scale = (data->plane[0] / data->resolution[0]);
+    double height_scale =  - (data->plane[1] / data->resolution[1]);
     first_real_value += width_scale/2;
     first_imaginary_value += height_scale/2;
 
@@ -81,7 +81,10 @@ int main(int argc, char* argv[]){
                 sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]);
                 break;
             case 'c':
-                sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]);
+                if (sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]) != 2){
+                    perror("fatal: invalid center specification");
+                    exit(EXIT_FAILURE);
+                }
                 break;
             case 'w':
                 data.plane[0] = atoi(optarg);
@@ -93,7 +96,7 @@ int main(int argc, char* argv[]){
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0)
                     data.output = fopen(optarg, "w");
                     if (! data.output){
-                        perror("cannot open file to write");
+                        perror("fatal: cannot open output file");
                         exit(EXIT_FAILURE);
                     }
                     need_close = true;
