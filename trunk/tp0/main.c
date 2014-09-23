@@ -78,7 +78,10 @@ int main(int argc, char* argv[]){
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]);
+                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1])){
+                    perror("fatal: invalid resolution specification");
+                    exit(EXIT_FAILURE);
+                }
                 break;
             case 'c':
                 if (sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]) != 2){
@@ -93,13 +96,18 @@ int main(int argc, char* argv[]){
                 data.plane[1] = atoi(optarg);
                 break;
             case 'o':
-                if (strcmp(ARG_DEFAULT_OUT, optarg) != 0)
+                if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
                     data.output = fopen(optarg, "w");
                     if (! data.output){
                         perror("fatal: cannot open output file");
                         exit(EXIT_FAILURE);
                     }
                     need_close = true;
+                }
+                break;
+            default:
+                perror("fatal: invalid arguments");
+                exit(EXIT_FAILURE);
         }
     }
     generatePGM(&data);
