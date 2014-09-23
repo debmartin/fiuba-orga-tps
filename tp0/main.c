@@ -27,7 +27,7 @@ void generatePGM(OutputData* data){
     PGMData pgm_image;
     pgm_image.row = data->resolution[0];
     pgm_image.col = data->resolution[1];
-    pgm_image.max_gray = 256;
+    pgm_image.max_gray = 255;
     pgm_image.matrix = allocate_dynamic_matrix(pgm_image.row, pgm_image.col);
 
     double first_real_value = - ((float) data->plane[0])/2;
