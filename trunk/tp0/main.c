@@ -32,12 +32,12 @@ void generatePGM(OutputData* data){
 
     double first_real_value = - ((float) data->plane[0])/2;
     double first_imaginary_value = ((float)data->plane[1])/2;
-    double width_scale = ((float) data->plane[0]) / data->resolution[0];
-    double height_scale =  - ((float) data->plane[1]) / data->resolution[1];
+    double width_scale = (((float) data->plane[0]) / data->resolution[0]) / 2;
+    double height_scale =  - (((float) data->plane[1]) / data->resolution[1]) / 2;
 
     for(int i = 0; i < pgm_image.row; i++){
         for(int j = 0; j < pgm_image.col; j++){
-            pixel_t* pixel = crear_pixel(first_real_value + i * width_scale, first_imaginary_value + j * height_scale);
+            pixel_t* pixel = crear_pixel(first_real_value + (i + 1) * width_scale, first_imaginary_value + (j + 1) * height_scale);
             pgm_image.matrix[i][j] = velocidad_de_escape(pixel);
             destruir_pixel(pixel);
         }
