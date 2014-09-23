@@ -61,7 +61,7 @@ void OutputDataInitialize(OutputData* data){
 
 int terminateError(char* errorMessaje){
     perror(errorMessaje);
-    return EXIT_FAILURE;
+    return 1;
 }
 
 int main(int argc, char* argv[]){
@@ -71,7 +71,8 @@ int main(int argc, char* argv[]){
         {"center", required_argument, 0, 'c'},
         {"width", required_argument, 0, 'w'},
         {"height", required_argument, 0, 'H'},
-        {"output", required_argument, 0, 'o'}
+        {"output", required_argument, 0, 'o'},
+        {0, 0, 0, 0}
     };
 
     OutputData data;
@@ -111,15 +112,13 @@ int main(int argc, char* argv[]){
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
                     data.output = fopen(optarg, "w");
                     if (! data.output){
-                        perror("fatal: cannot open output file");
-                        exit(EXIT_FAILURE);
+                        return terminateError("fatal: cannot open output file");
                     }
                     need_close = true;
                 }
                 break;
             default:
-                perror("fatal: invalid arguments");
-                exit(EXIT_FAILURE);
+                return terminateError("fatal: invalid arguments");
         }
     }
     generatePGM(&data);
