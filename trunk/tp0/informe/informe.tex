@@ -1,0 +1,521 @@
+\documentclass[a4paper,10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[latin1]{inputenc}
+\usepackage[spanish]{babel}
+
+\title{ \textbf{ 6620. Organizaci\'on de Computadoras\\
+Trabajo Pr\'actico 0: \\
+Infraestructura B\'asica}}
+
+\author{	Riesgo, Daniela, \textit{Padr\'on Nro. 95557} \\
+            	\texttt{ danielap.riesgo@gmail.com } \\[2.5ex]
+            	Martin, D\'ebora, \textit{Padr\'on Nro. 90934} \\
+            	\texttt{ debbie1mes.world@gmail.com } \\[2.5ex]
+		Constantino, Guillermo, \textit{Padr\'on Nro. 89776} \\
+		\texttt{ guilleconstantino@gmail.com } \\[2.5ex]
+            	\normalsize{2do. Cuatrimestre de 2014} \\
+            	\normalsize{66.20 Organizaci\'on de Computadoras  $-$ Pr\'atica Martes} \\
+            	\normalsize{Facultad de Ingenier\'ia, Universidad de Buenos Aires} \\
+       }
+
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}  % quita el nmero en la primer pagina
+
+
+\begin{abstract}
+El presente trabajo tiene como objetivo familiarizarse con las herramientas de software que ser\'an usadas en los siguientes trabajos, implementando un programa en lenguaje C, y su correspondiente documentaci\'on, que resuelva el problema  planteado, que permita dibujar el conjunto de Mandelbrot y sus vecindades
+
+\end{abstract}
+\pagebreak
+
+
+
+\setcounter{page}{2}
+\section{Introducci\'on}
+Al comenzar a utilizar nuevas herramientas, en cualquier \'ambito, es necesaria una breve introducci\'on al funcionamiento de las mismas: tener una noci\'on de las prestaciones que ofrecen, asi tambi\'en como de sus limitaciones.\\
+Como primer objetivo en la materia, nos proponemos adentrarnos en el funcionamiento del emulador GXemul. Nuestra meta ser\'a emular una plataforma MIPS (ejecutando un sistema operativo NetBSD), para poder desde all\'i desarrollar programas en lenguaje C. Estos ser\'an compilados y ejecutados haciendo uso de la herramienta GCC (GNU Compiler Collection), mediante el cual tambi\'en ser\'a posible obtener, a posteriori, el c\'odigo MIPS32 del programa.\\
+Una vez cumplido este objetivo, aprenderemos los rudimientos de \LaTeX{} para generar la documentaci\'on relevante al trabajo pr\'actico.
+
+\pagebreak
+
+
+
+\section{Programa a implementar}
+Se trata de un disenar un programa que permita dibujar el conjunto de Mandelbrot y sus vecindades, en lenguaje C.
+El mismo recibir\'a por l\'inea de comando, una serie de par\'ametros describiendo la regi\'on del
+plano complejo y las caracter\'isticas del archivo imagen a generar. No deber\'a interactuar con
+el usuario, ya que no se trata de un programa interactivo, sino m\'as bien de una herramienta
+de procesamiento batch. Al finalizar la ejecuci\'on, y volver al sistema operativo, el programa
+habr\'a  dibujado el fractal en el archivo de salida.
+El formato gr\'afico a usar es PGM o portable gray map, un formato simple para describir im\'agenes a
+ digitales monocrom\'aticas.
+
+\pagebreak
+
+
+
+\section{Explicaci\'on de la Implementaci\'on}
+Las principales funciones y estructuras en nuestra implementaci\'on son las siguientes:
+
+\subsection{main.c}
+
+
+\subsubsection{main}
+Esta funci\'on se encarga de procesar las opciones ingresadas por l\'inea de comando e invocar a las funciones  seg\'un corresponda.
+
+\subsubsection{generatePGM}
+Genera la im\'agen PGM a partir de los valores de escape, que son insertados en la matriz que utiliza la funci\'on writePGM para generar dicha im\'agen.
+
+\subsection{pgm.h}
+Contiene la estructura b\'asica para generar una imagen del tipo PGM.
+
+\subsubsection{writePGM}
+Toma como par\'ametros el nombre de archivo, y una estructura PGM, la cual contiene: cantidad de filas y columnas, color de gris m\'aximo, y la matriz de pixeles.
+
+\subsection{velocidad\_escape.h}
+Este archivo maneja la estructura de los pixeles y operaciones entre n\'umeros complejos.
+
+\subsubsection{velocidad\_de\_escape}
+Devuelve velocidad de escape seg\'un el pixel y complejo que represente. Este valor define una intensidad seg\'un la condici\'on de corte.
+
+\pagebreak
+
+
+
+\section{Generaci\'on de ejecutables y c\'odigo assembly}
+Para generar el ejecutable del programa, debe correrse la siguiente sentencia en una terminal:
+
+\begin{verbatim}
+$ gcc -Wall -pedantic --std=c99 -c velocidad_escape.c
+$ gcc -Wall -pedantic --std=c99 -c pgm.c
+$ gcc -Wall -pedantic --std=c99 velocidad_escape.o pgm.o main.c -o tp0
+\end{verbatim}
+
+Para generar el c\'odigo MIPS32, debe ejecutarse lo siguiente:
+\begin{verbatim}
+$ gcc -Wall -S -pedantic --std=c99 -c velocidad_escape.c
+$ gcc -Wall -S -pedantic --std=c99 -c pgm.c
+$ gcc -Wall -S -pedantic --std=c99 velocidad_escape.o pgm.o main.c -o tp0
+\end{verbatim}
+
+N\'otese que para ambos casos se han activado todos los mensajes de 'Warning' (-Wall). Adem\'as, para el caso de MIPS, se ha habilitado '-S', que detiene al compilador luego de generar el assembly.
+\pagebreak
+
+
+
+
+\section{Corridas de prueba}
+
+En esta secci\'on se presentan algunas de las distintas corridas que se realizaron para probar el funcionamiento del trabajo pr\'actico.\\
+
+1. Generamos una imagen de 1 punto de lado, centrada en el or\'igen del plano complejo:
+\begin{verbatim}
+> ./tp0 -c 0+0i -r 1x1 -o -
+P2
+1
+1
+255
+255
+\end{verbatim}
+
+Notar que el resultado es correcto, ya que este punto pertenece al conjunto de Mandelbrot.\\
+\\
+2. Repetimos el experimento, pero nos centramos ahora en un punto que seguro no pertenece
+al conjunto:
+\begin{verbatim}
+> ./tp0 -c 10+0i -r 1x1 -o -
+P2
+1
+1
+255
+0
+\end{verbatim}
+
+Notar que el resultado es correcto, ya que este punto pertenece al conjunto de Mandelbrot.\\
+3. Imagen imposible:\begin{verbatim}
+> ./tp0 -c 0+0i -r 0x1 -o -
+Usage:
+  tp0 -h
+  tp0 -V
+: Undefined error: 0
+\end{verbatim}
+
+
+4. Archivo de salida imposible:\begin{verbatim}
+> ./tp0 -o /tmp
+fatal: cannot open output file: is a directory
+\end{verbatim}
+
+
+5. Coordenadas complejas imposibles:
+\begin{verbatim}
+> ./tp0 -c 1+3 -o -
+fatal: invalid center specification: Undefined error: 0\end{verbatim}
+
+
+6. Argumentos de l\'inea de comando vac\'ios,
+\begin{verbatim}
+> ./tp0 -c "" -o -
+fatal: invalid center specification: Undefined error: 0\end{verbatim}
+
+
+7. Imagen PGM
+\begin{verbatim}
+> ./tp0 -o uno.pgm
+\end{verbatim}
+Genera la siguiente imagen:
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{uno.png}
+    \label{fig:Region barrida por defecto}
+    \caption{}
+  \end{center}
+\end{figure}
+
+
+
+8. Imagen PGM con regi\'on no centrada y un rect\'angulo de 0,005 unidades de lado.
+\begin{verbatim}
+> ./tp0 -c +0.282-0.01i -w 0.005 -H 0.005 -o dos.pgm
+\end{verbatim}
+Genera la siguiente imagen:
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.8\textwidth]{dos.png}
+    \label{fig:Region comprendida entre 0,2795 - 0,0075i y 0,2845 - 0,0125i}
+    \caption{}
+  \end{center}
+\end{figure}
+
+
+\pagebreak
+
+
+\section{C\'odigo fuente C}
+
+\subsection{main.c}
+
+\begin{verbatim}
+#include <stdlib.h>
+#include <getopt.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+#include "pgm.h"
+#include "velocidad_escape.h"
+
+#define DEFAULT_RESOLUTION_WIDTH 640
+#define DEFAULT_RESOLUTION_HEIGHT 480
+#define DEFAULT_CENTER_REAL 0
+#define DEFAULT_CENTER_IMAG 0
+#define DEFAULT_PLANE_WIDTH 4
+#define DEFAULT_PLANE_HEIGHT 4
+#define ARG_DEFAULT_OUT "-"
+
+
+typedef struct _OutputData{
+    int resolution[2];
+    float center[2];
+    float plane[2];
+    FILE* output;
+} OutputData;
+
+void generatePGM(OutputData* data){
+    PGMData pgm_image;
+    pgm_image.row = data->resolution[1];
+    pgm_image.col = data->resolution[0];
+    pgm_image.max_gray = 255;
+    pgm_image.matrix = allocate_dynamic_matrix(pgm_image.row, pgm_image.col);
+
+    double first_real_value = data->center[0] - data->plane[0]/2;
+    double first_imaginary_value = data->center[1] + data->plane[1]/2;
+    double width_scale = (data->plane[0] / data->resolution[0]);
+    double height_scale =  - (data->plane[1] / data->resolution[1]);
+    first_real_value += width_scale/2;
+    first_imaginary_value += height_scale/2;
+
+    for(int i = 0; i < pgm_image.row; i++){
+        for(int j = 0; j < pgm_image.col; j++){
+            pixel_t* pixel = crear_pixel(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
+            pgm_image.matrix[i][j] = velocidad_de_escape(pixel);
+            destruir_pixel(pixel);
+        }
+    }
+
+    writePGM(data->output, &pgm_image);
+    deallocate_dynamic_matrix(pgm_image.matrix, pgm_image.row);
+}
+
+void OutputDataInitialize(OutputData* data){
+    data->resolution[0] = DEFAULT_RESOLUTION_WIDTH;
+    data->resolution[1] = DEFAULT_RESOLUTION_HEIGHT;
+    data->center[0] = DEFAULT_CENTER_REAL;
+    data->center[1] =  DEFAULT_CENTER_IMAG;
+    data->plane[0] = DEFAULT_PLANE_WIDTH;
+    data->plane[1] = DEFAULT_PLANE_HEIGHT;
+    data->output = stdout;
+}
+
+int terminateError(char* errorMessaje){
+    perror(errorMessaje);
+    return 1;
+}
+
+int main(int argc, char* argv[]){
+    static struct option long_options[] =
+    {
+        {"resolution", required_argument, 0, 'r'},
+        {"center", required_argument, 0, 'c'},
+        {"width", required_argument, 0, 'w'},
+        {"height", required_argument, 0, 'H'},
+        {"output", required_argument, 0, 'o'},
+        {0, 0, 0, 0}
+    };
+
+    OutputData data;
+    OutputDataInitialize(&data);
+    bool need_close = false;
+    char option, i;
+    int option_index;
+
+    while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
+        switch (option){
+            case 'r':
+                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
+                    return terminateError("fatal: invalid resolution specification");
+                }
+                if (data.resolution[0] == 0 || data.resolution[1] == 0){
+                    return terminateError("Usage:\n\ttp0 -h\n\ttp0 -V\n");
+                }
+                break;
+            case 'c':
+                if (sscanf(optarg, "%f%*c%f%c", &data.center[0], &data.center[1], &i) != 3 || i!='i'){
+                    return terminateError("fatal: invalid center specification");
+                }
+                break;
+            case 'w':
+                data.plane[0] = atof(optarg);
+                if (data.plane[0] == 0){
+                    return terminateError("fatal: invalid width specification");
+                }
+                break;
+            case 'H':
+                data.plane[1] = atof(optarg);
+                if (data.plane[1] == 0){
+                    return terminateError("fatal: invalid height specification");
+                }
+                break;
+            case 'o':
+                if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
+                    data.output = fopen(optarg, "w");
+                    if (! data.output){
+                        return terminateError("fatal: cannot open output file");
+                    }
+                    need_close = true;
+                }
+                break;
+            default:
+                return terminateError("fatal: invalid arguments");
+        }
+    }
+    generatePGM(&data);
+    if (need_close) fclose(data.output);
+    return 0;
+}
+
+\end{verbatim}
+\pagebreak
+
+\subsection{pgm.c}
+
+\begin{verbatim}
+#include "pgm.h"
+
+#define HI(num)	(((num) & 0x0000FF00) >> 8)
+#define LO(num)	((num) & 0x000000FF)
+
+int **allocate_dynamic_matrix(int row, int col) {
+
+	int **ret_val;
+	int i;
+
+	ret_val = (int **) malloc(sizeof(int *) * row);
+	if (ret_val == NULL) {
+		perror("memory allocation failure");
+		exit(EXIT_FAILURE);
+	}
+
+	for (i = 0; i < row; ++i) {
+		ret_val[i] = (int *) malloc(sizeof(int) * col);
+		if (ret_val[i] == NULL) {
+			perror("memory allocation failure");
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	return ret_val;
+}
+
+void deallocate_dynamic_matrix(int **matrix, int row) {
+
+	int i;
+
+	for (i = 0; i < row; ++i)
+		free(matrix[i]);
+	free(matrix);
+}
+
+void SkipComments(FILE *fp) {
+
+	int ch;
+	char line[100];
+
+	while ((ch = fgetc(fp)) != EOF && isspace(ch))
+		;
+	if (ch == '#') {
+		fgets(line, sizeof(line), fp);
+		SkipComments(fp);
+	} else
+		fseek(fp, -1, SEEK_CUR);
+
+}
+
+void writePGM(FILE *pgmFile, const PGMData *data) {
+	int i, j;
+	int lo;
+
+	fprintf(pgmFile, "P2\n");
+	fprintf(pgmFile, "%d\n%d\n", data->col, data->row);
+	fprintf(pgmFile, "%d\n", data->max_gray);
+
+	for (i = 0; i < data->row; ++i){
+		for (j = 0; j < data->col; ++j) {
+            fprintf(pgmFile, "%d ", data->matrix[data->row - i-1][j]);
+		}
+		fprintf(pgmFile, "\n");
+	}
+}
+
+\end{verbatim}
+\pagebreak
+
+\subsection{velocidad\_escape.c}
+
+\begin{verbatim}
+#include <stdlib.h>
+#include <stddef.h>
+#include <math.h>
+#include <complex.h>
+
+#include "velocidad_escape.h"
+
+#define N 256
+
+typedef struct num_complejo {
+	double real;
+	double imaginario;
+} complejo;
+
+struct pixel {
+	complejo* numero_complejo;
+};
+
+complejo* crear_complejo(double real, double imaginaria) {
+	complejo* num = malloc(sizeof(complejo));
+	if (num == NULL)
+		return NULL;
+	num->real = real;
+	num->imaginario = imaginaria;
+	return num;
+}
+
+void destruir_complejo(complejo* num) {
+	free(num);
+}
+
+pixel_t* crear_pixel(double real, double imaginaria) {
+	pixel_t* pixel = malloc(sizeof(pixel));
+	if (pixel == NULL)
+		return NULL;
+	complejo* num = crear_complejo(real, imaginaria);
+	if (num == NULL) {
+		free(pixel);
+		return NULL;
+	}
+	pixel->numero_complejo = num;
+	return pixel;
+}
+
+void destruir_pixel(pixel_t* pixel) {
+	destruir_complejo(pixel->numero_complejo);
+	free(pixel);
+}
+
+unsigned int modulo_al_2(complejo* num) {
+	return (num->real * num->real) + (num->imaginario * num->imaginario);
+}
+
+complejo* sumar(complejo* num1, complejo* num2) {
+	double real = num1->real + num2->real;
+	double imaginario = num1->imaginario + num2->imaginario;
+	return crear_complejo(real, imaginario);
+}
+
+complejo* al_2(complejo* num) {
+	double real = num->real * num->real - num->imaginario * num->imaginario;
+	double imaginario = 2 * num->real * num->imaginario;
+	return crear_complejo(real, imaginario);
+}
+
+int velocidad_de_escape(pixel_t* pixel) {
+	complejo* num = pixel->numero_complejo;
+	complejo* num2 = crear_complejo(num->real, num->imaginario);
+	int i;
+	for (i = 0; i < (N - 1); ++i) {
+		if (modulo_al_2(num2) > 4)
+			break;
+		num2 = sumar(al_2(num2), num);
+	}
+	return i;
+}
+
+\end{verbatim}
+\pagebreak
+
+\section{Conclusiones}
+El trabajo pr\'activo motivo de este informe ha presentado al equipo diversos desaf\'ios. En primer lugar cabe mencionar la adaptaci\'on a un ambiente basado en GNU/Linux, no dominado por todos sus integrantes en igual manera. Tambi\'en es destacable la dificultad inicial que trajo la correcta configuraci\'on del ambiente virtual utilizado para emular la m\'aquina MIPS. Finalmente, tambi\'en fue invertida una cantidad considerable de tiempo en aprender a utilizar e investigar sobre \LaTeX{}, ya que si bien permite obtener muy buenos resultados, se requiere de mucha lectura para poder aprovechar todo su potencial.
+Por las razones expuestas, consideramos muy necesario un trabajo pr\'actico introductorio de esta naturaleza,para nivelar e introducir los elementos a utilizar en las dem\'as actividades pr\'acticas que se desarrollar\'an en el curso.\\
+Como conclusi\'on final, podemos considerar que hemos logrado obtener un buen manejo de las herramientas introducidas en este primer proyecto.
+
+\pagebreak
+
+\begin{thebibliography}{99}
+	
+\bibitem{GXEMUL} GXemul, http://gxemul.sourceforge.net/
+
+\bibitem{NETBSD} The NetBSD Project, http://www.netbsd.org/
+
+\bibitem{MANDEL} Mandelbrot, http://en.wikipedia.org/wiki/Mandelbrot\_set/
+
+\bibitem{MANSET}  Introduction to the Mandelbrot Set,
+http://www.olympus.net/personal/dewey/mandelbrot.html.
+
+\bibitem{MANEXT} Smooth shading for the Mandelbrot exterior.
+http://linas.org/art-gallery/escape/smooth.html. Linas Vepstas. October, 1997.
+
+\bibitem{PGMFORMAT} PGM format specification.
+http://netpbm.sourceforge.net/doc/pgm.html.
+
+\bibitem{LATEX} Oetiker, Tobias, "The Not So Short Introduction To LaTeX2", http://www.physics.udel.edu/$\sim$dubois/lshort2e/
+
+
+
+\end{thebibliography}
+
+\end{document}
