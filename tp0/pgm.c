@@ -32,19 +32,19 @@
 //
 //}
 
-float **allocate_dynamic_matrix(int row, int col) {
+int **allocate_dynamic_matrix(int row, int col) {
 
-	float **ret_val;
+	int **ret_val;
 	int i;
 
-	ret_val = (float **) malloc(sizeof(float *) * row);
+	ret_val = (int **) malloc(sizeof(int *) * row);
 	if (ret_val == NULL) {
 		perror("memory allocation failure");
 		exit(EXIT_FAILURE);
 	}
 
 	for (i = 0; i < row; ++i) {
-		ret_val[i] = (float *) malloc(sizeof(float) * col);
+		ret_val[i] = (int *) malloc(sizeof(int) * col);
 		if (ret_val[i] == NULL) {
 			perror("memory allocation failure");
 			exit(EXIT_FAILURE);
@@ -54,7 +54,7 @@ float **allocate_dynamic_matrix(int row, int col) {
 	return ret_val;
 }
 
-void deallocate_dynamic_matrix(float **matrix, int row) {
+void deallocate_dynamic_matrix(int **matrix, int row) {
 
 	int i;
 

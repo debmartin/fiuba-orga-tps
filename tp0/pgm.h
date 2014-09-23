@@ -10,12 +10,12 @@ typedef struct _PGMData {
 	int row;
 	int col;
 	int max_gray;
-	float **matrix;
+	int **matrix;
 } PGMData;
 
-float ** allocate_dynamic_matrix(int row, int col);
+int ** allocate_dynamic_matrix(int row, int col);
 
-void deallocate_dynamic_matrix(float **matrix, int row);
+void deallocate_dynamic_matrix(int **matrix, int row);
 
 void SkipComments(FILE *fp);
 
