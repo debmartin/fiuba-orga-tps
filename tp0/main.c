@@ -77,7 +77,7 @@ int main(int argc, char* argv[]){
     OutputData data;
     OutputDataInitialize(&data);
     bool need_close = false;
-    char option;
+    char option, i;
     int option_index;
 
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]){
                 }
                 break;
             case 'c':
-                if (sscanf(optarg, "%f%*c%f%*c", &data.center[0], &data.center[1]) != 2){
+                if (sscanf(optarg, "%f+%f%c", &data.center[0], &data.center[1], &i) != 2 || i!='i'){
                     return terminateError("fatal: invalid center specification");
                 }
                 break;
