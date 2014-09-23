@@ -1,12 +1,12 @@
 #ifndef VELOCIDAD_ESCAPE_H_INCLUDED
 #define VELOCIDAD_ESCAPE_H_INCLUDED
 
-typedef struct pixel pixel_t;
+typedef struct num_complejo complejo;
 
-int velocidad_de_escape(pixel_t* pixel);
+int velocidad_de_escape(complejo* num);
 
-pixel_t* crear_pixel(double real, double imaginaria);
+complejo* crear_complejo(double real, double imaginaria);
 
-void destruir_pixel(pixel_t* pixel);
+void destruir_complejo(complejo* num);
 
 #endif // VELOCIDAD_ESCAPE_H_INCLUDED

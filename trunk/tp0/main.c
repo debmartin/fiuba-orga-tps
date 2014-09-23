@@ -39,9 +39,9 @@ void generatePGM(OutputData* data){
 
     for(int i = 0; i < pgm_image.row; i++){
         for(int j = 0; j < pgm_image.col; j++){
-            pixel_t* pixel = crear_pixel(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
-            pgm_image.matrix[i][j] = velocidad_de_escape(pixel);
-            destruir_pixel(pixel);
+            complejo* num = crear_complejo(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
+            pgm_image.matrix[i][j] = velocidad_de_escape(num);
+            destruir_complejo(num);
         }
     }
 
