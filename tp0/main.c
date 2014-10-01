@@ -85,40 +85,47 @@ int main(int argc, char* argv[]){
         switch (option){
             case 'r':
                 if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
-                    return terminateError("fatal: invalid resolution specification");
+                    printf("fatal: invalid resolution specification\n");
+                    return 1;
                 }
                 if (data.resolution[0] <= 0 || data.resolution[1] <= 0){
-                    return terminateError("Usage:\n\ttp0 -h\n\ttp0 -V\n");
+                    printf("Usage:\n\ttp0 -h\n\ttp0 -V\n");
+                    return 1;
                 }
                 break;
             case 'c':
                 if (sscanf(optarg, "%f%*c%f%c", &data.center[0], &data.center[1], &i) != 3 || i!='i'){
-                    return terminateError("fatal: invalid center specification");
+                    printf("fatal: invalid center specification\n");
+                    return 1;
                 }
                 break;
             case 'w':
                 data.plane[0] = atof(optarg);
                 if (data.plane[0] <= 0){
-                    return terminateError("fatal: invalid width specification");
+                    printf("fatal: invalid width specification\n");
+                    return 1;
                 }
                 break;
             case 'H':
                 data.plane[1] = atof(optarg);
                 if (data.plane[1] <= 0){
-                    return terminateError("fatal: invalid height specification");
+                    printf("fatal: invalid height specification\n");
+                    return 1;
                 }
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
                     data.output = fopen(optarg, "w");
                     if (! data.output){
-                        return terminateError("fatal: cannot open output file");
+                        printf("fatal: cannot open output file\n");
+                        return 1;
                     }
                     need_close = true;
                 }
                 break;
             default:
-                return terminateError("fatal: invalid arguments");
+                printf("fatal: invalid arguments\n");
+                return 1;
         }
     }
     generatePGM(&data);
