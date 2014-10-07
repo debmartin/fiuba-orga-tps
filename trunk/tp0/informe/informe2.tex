@@ -14,7 +14,7 @@ Infraestructura B\'asica}}
 \author{ Riesgo, Daniela, \textit{Padr\'on Nro. 95557} \\
 \texttt{ danielap.riesgo@gmail.com } \\[2.5ex]
 Martin, D\'ebora, \textit{Padr\'on Nro. 90934} \\
-\texttt{ debbie1mes.world@gmail.com } \\[2.5ex]
+\texttt{ debbie1new.world@gmail.com } \\[2.5ex]
 Constantino, Guillermo, \textit{Padr\'on Nro. 89776} \\
 \texttt{ guilleconstantino@gmail.com } \\[2.5ex]
 \normalsize{2do. Cuatrimestre de 2014} \\
@@ -27,21 +27,20 @@ Constantino, Guillermo, \textit{Padr\'on Nro. 89776} \\
 \begin{document}
 \maketitle
 \thispagestyle{empty} % quita el nmero en la primer pagina
-
-\newpage
-\tableofcontents
-\newpage
-\includepdf[pages={-}]{./Enunciado.pdf}
-
 \begin{abstract}
 El presente trabajo tiene como objetivo familiarizarse con las herramientas de software que ser\'an usadas en los siguientes trabajos, implementando un programa en lenguaje C, y su correspondiente documentaci\'on, que resuelva el problema planteado, que permita dibujar el conjunto de Mandelbrot y sus vecindades
 
 \end{abstract}
 
+\cleardoublepage
+\setcounter{page}{0}
+\newpage
+\tableofcontents
 
+\newpage
+\includepdf[pages={-}, pagecommand={\thispagestyle{empty}}, addtotoc={1, section, 1, Enunciado, enunciado}]{./Enunciado.pdf}
+\newpage
 
-
-\setcounter{page}{2}
 \section{Introducci\'on}
 Al comenzar a utilizar nuevas herramientas, en cualquier \'ambito, es necesaria una breve introducci\'on al funcionamiento de las mismas: tener una noci\'on de las prestaciones que ofrecen, asi tambi\'en como de sus limitaciones.\\
 Como primer objetivo en la materia, nos proponemos adentrarnos en el funcionamiento del emulador GXemul. Nuestra meta ser\'a emular una plataforma MIPS (ejecutando un sistema operativo NetBSD), para poder desde all\'i desarrollar programas en lenguaje C. Estos ser\'an compilados y ejecutados haciendo uso de la herramienta GCC (GNU Compiler Collection), mediante el cual tambi\'en ser\'a posible obtener, a posteriori, el c\'odigo MIPS32 del programa.\\
