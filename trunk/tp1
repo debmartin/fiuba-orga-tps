@@ -15,6 +15,7 @@ sw ra, FRAME_SPACE-Padding
 subu sp, sp, FRAME_SPACE
 //Pongo el frame pointer al final de mi frame.
 or sp, zero, $fp
+//Guardo el a0 que es el puntero a la estructura param_t en la ABA.
 sw a0, FRAME_SPACE($fp)
 
 //Offset dentro de la estructura param.
@@ -28,9 +29,37 @@ sw a0, FRAME_SPACE($fp)
 #define OFF_RES_IMAG 32
 #define OFF_SHADES 40
 #define OFF_OUTPUT_FILE 48
-
 //Offset del numero de archivo en la estructura _sFile
-#define OFF_FILE_NUMBER ...
+#define OFF_FILE_NUMBER 112
 
-
+//t0 para el Upper Left Real y lo guardo en el primer lugar de la LTA.
+lw t0, OFF_UPPER_LEFT_REAL(a0)
+sw t0, ... //Principio de la LTA
+//ídem la parte imaginaria, que guardo abajo
+lw t0, OFF_UPPER_LEFT_IMAG(a0)
+sw t0, ...
+// Lower Right real
+lw t0, OFF_LOWER_RIGHT_REAL(a0)
+sw t0, ...
+// Lower Right imag
+lw t0, OFF_LOWER_RIGHT_IMAG(a0)
+sw t0, ...
+// Scale real
+lw t0, OFF_SCALE_REAL(a0)
+sw t0, ...
+// Scale imag
+lw t0, OFF_SCALE_IMAG(a0)
+sw t0, ...
+// Resolution real
+lw t0, OFF_RES_REAL(a0)
+sw t0, ...
+// Resolution imag
+lw t0, OFF_RES_IMAG(a0)
+sw t0, ...
+// Shades
+lw t0, OFF_SHADES(a0)
+sw t0, ...
+//Output file
+lw t0, OFF_OUTPUT_FILE(a0)
+sw t0, ...
 
