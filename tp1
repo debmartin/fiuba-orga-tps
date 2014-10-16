@@ -1,0 +1,36 @@
+#include <mips/regdef.h>
+#include <sys/syscall.h>
+.abicalls
+.align 2
+.global mips32_plot
+.entity mips32_plot
+mips32_plot:
+#define FRAME_SPACE ...
+.frame $fp, FRAME_SPACE, ra
+//.cpload t9
+.cprestore FRAME_SPACE-Padding-$(del ra)-4(del fp)
+sw $fp, FRAME_SPACE-Padding-4(del ra)
+sw ra, FRAME_SPACE-Padding
+//Pongo el stack pointer al final de mi frame.
+subu sp, sp, FRAME_SPACE
+//Pongo el frame pointer al final de mi frame.
+or sp, zero, $fp
+sw a0, FRAME_SPACE($fp)
+
+//Offset dentro de la estructura param.
+#define OFF_UPPER_LEFT_REAL 0
+#define OFF_UPPER_LEFT_IMAG 4
+#define OFF_LOWER_RIGHT_REAL 8
+#define OFF_LOWER_RIGHT_IMAG 12
+#define OFF_SCALE_REAL 16
+#define OFF_SCALE_IMAG 20
+#define OFF_RES_REAL 24
+#define OFF_RES_IMAG 32
+#define OFF_SHADES 40
+#define OFF_OUTPUT_FILE 48
+
+//Offset del numero de archivo en la estructura _sFile
+#define OFF_FILE_NUMBER ...
+
+
+
