@@ -10,6 +10,18 @@ struct num_complejo {
 	double imaginario;
 };
 
+double getReal(complejo* num){
+    return num->real;
+}
+double getImag(complejo* num){
+    return num->imaginario;
+}
+double setImag(complejo* num, double imag){
+    num->imaginario = imag;
+}
+double setReal(complejo* num, double real){
+    num->real = real;
+}
 complejo* crear_complejo(double real, double imaginaria) {
 	complejo* num = malloc(sizeof(complejo));
 	if (num == NULL)
