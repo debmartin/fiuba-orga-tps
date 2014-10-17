@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "velocidad_escape.h"
 
 #define DEFAULT_RESOLUTION_WIDTH 640
 #define DEFAULT_RESOLUTION_HEIGHT 480
@@ -50,47 +49,49 @@ int main(int argc, char* argv[]){
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                if (sscanf(optarg, "%d%*c%d", &data.resolution[0], &data.resolution[1]) != 2){
+                if (sscanf(optarg, "%d%*c%d", &resolution[0], &resolution[1]) != 2){
                     printf("fatal: invalid resolution specification\n");
-                    return 1;
+                    goto usage;
                 }
-                if (data.resolution[0] <= 0 || data.resolution[1] <= 0){
-                    printf("Usage:\n\ttp0 -h\n\ttp0 -V\n");
-                    return 1;
+                if (resolution[0] <= 0 || resolution[1] <= 0){
+                    printf("fatal: invalid resolution specification\n");
+                    goto usage;
                 }
+
                 break;
             case 'c':
-                if (sscanf(optarg, "%f%*c%f%c", &data.center[0], &data.center[1], &i) != 3 || i!='i'){
+                if (sscanf(optarg, "%f%*c%f%c", &center[0], &center[1], &i) != 3 || i!='i'){
                     printf("fatal: invalid center specification\n");
-                    return 1;
+                    goto usage;
                 }
                 break;
             case 'w':
-                data.plane[0] = atof(optarg);
-                if (data.plane[0] <= 0){
+                plane[0] = atof(optarg);
+                if (plane[0] <= 0){
                     printf("fatal: invalid width specification\n");
-                    return 1;
+                    goto usage;
                 }
                 break;
             case 'H':
-                data.plane[1] = atof(optarg);
-                if (data.plane[1] <= 0){
+                plane[1] = atof(optarg);
+                if (plane[1] <= 0){
                     printf("fatal: invalid height specification\n");
-                    return 1;
+                    goto usage;
                 }
                 break;
             case 'o':
                 if (strcmp(ARG_DEFAULT_OUT, optarg) != 0){
-                    data.output = fopen(optarg, "w");
-                    if (! data.output){
+                    output = fopen(optarg, "w");
+                    if (! output){
                         printf("fatal: cannot open output file\n");
-                        return 1;
+                        goto usage;
                     }
                     need_close = true;
                 }
                 break;
             default:
-                printf("fatal: invalid arguments\n");
+            usage:
+                printf("Usage:\n\ttp0 -H, for height of the complex plane (4 by default)\n\ttp0 -w, for width of the complex plane (4 by default)\n\ttp0 -r, for resolution of the image: AxB format with A and B natural numbers (640x480 by default)\n\ttp0 -c, for centre of the complex plane: A+Bi format with A and B numbers (0+0i by default)\n\ttp0 -o, for pgm output file (stdout by default)\n");
                 return 1;
         }
     }
@@ -106,24 +107,19 @@ int main(int argc, char* argv[]){
     first_real_value += width_scale/2;
     first_imaginary_value += height_scale/2;
 
-    int matrix[data.resolution[1]][data.resolution[0]];
 
     for(int i = data.resolution[1]-1; i >= 0; i--){
         for(int j = 0; j < data.resolution[0]; j++){
             double real1 = first_real_value + j * width_scale, imag1 = first_imaginary_value + i * height_scale;
             double real2 = real1, imag2 = imag1;
-            complejo* num1 = crear_complejo(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
-            complejo* num2 = crear_complejo(first_real_value + j * width_scale, first_imaginary_value + i * height_scale);
 
             int vel;
             for (vel = 0; vel < (N - 1); ++vel) {
                 if (((unsigned int) (real2*real2 + imag2*imag2)) > 4)
                     break;
-                num2 = sumar(al_2(num2), num1);
-                real2 = getReal(num2);
-                imag2 = getImag(num2);
-//                real2 = real2 * real2 - imag2 * imag2 + real1;
-//                imag2 = 2 * real2 * imag2 + imag1;
+                double aux = real2 * real2 - imag2 * imag2 + real1;
+                imag2 = 2 * real2 * imag2 + imag1;
+                real2 = aux;
             }
 
             fprintf(data.output, "%d ", vel);
