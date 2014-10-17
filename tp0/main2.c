@@ -27,21 +27,21 @@ int main(int argc, char* argv[]){
     int resolution[2];
     float center[2];
     float plane[2];
-	int max_gray;
+        int max_gray;
     FILE* output;
-	
-	// La inicializo por default
-	resolution[0] = DEFAULT_RESOLUTION_WIDTH;
+       
+    // La inicializo por default
+    resolution[0] = DEFAULT_RESOLUTION_WIDTH;
     resolution[1] = DEFAULT_RESOLUTION_HEIGHT;
     center[0] = DEFAULT_CENTER_REAL;
     center[1] =  DEFAULT_CENTER_IMAG;
     plane[0] = DEFAULT_PLANE_WIDTH;
     plane[1] = DEFAULT_PLANE_HEIGHT;
-	max_gray = DEFAULT_MAX_GRAY;
+    max_gray = DEFAULT_MAX_GRAY;
     output = stdout;
-	
+       
 
-	// Parseo y verifico argumentos.
+    // Parseo y verifico argumentos.
     bool need_close = false;
     char option, i;
     int option_index;
@@ -95,17 +95,17 @@ int main(int argc, char* argv[]){
                 return 1;
         }
     }
-    
-	// Calculo y escribo el archivo:
-	
-	// Armo escala.
-	double first_real_value = center[0] - plane[0]/2;
+   
+    // Calculo y escribo el archivo:
+       
+    // Armo escala.
+    double first_real_value = center[0] - plane[0]/2;
     double first_imaginary_value = center[1] + plane[1]/2;
     double width_scale = (plane[0] / resolution[0]);
     double height_scale =  - (plane[1] / resolution[1]);
     first_real_value += width_scale/2;
     first_imaginary_value += height_scale/2;
-	
+       
 	// Escribo parámetros de la imagen.
 	fprintf(output, "P2\n");
 	fprintf(output, "%d\n%d\n", resolution[0], resolution[1]);
@@ -114,29 +114,31 @@ int main(int argc, char* argv[]){
 	// Escribo valor de cada pixel.
 	int j, k;
 	for (j = 0; j < resolution[1]; ++j){
-		for (k = 0; k < resolution[0]; ++k) {
-            
-			double real = first_real_value + k * width_scale;
-			double imag = first_imaginary_value + j * height_scale;
-			
-			// Calculo velocidad de escape
-			int vel;
-			for (vel = 0; vel < max_gray; ++vel) {
-				if ((real * real + imag * imag) > 4)
-					//Módulo al cuadrado > 4
-					break;
-				// Sino, elevo al cuadrado y le sumo a si mismo
-				real = real * real - imag * imag + real;
-				imag = 2 * real * imag + imag;
+			for (k = 0; k < resolution[0]; ++k) {
+	   
+					double real = first_real_value + k * width_scale;
+					double imag = first_imaginary_value + j * height_scale;
+				   
+					// Calculo velocidad de escape
+					int vel;
+					double real2 = real;
+					double imag2 = imag;
+					for (vel = 0; vel < max_gray; ++vel) {
+						if ((real2 * real2 + imag2 * imag2) > 4)
+						//Módulo al cuadrado > 4
+							break;
+						// Sino, elevo al cuadrado y le sumo a si mismo
+						real2 = (real2 * real2) - (imag2 * imag2) + real;
+						imag2 = (2 * real2 * imag2) + imag;
+					}
+				   
+					fprintf(output, "%d ", vel);
 			}
-			
-			fprintf(output, "%d ", vel);
-		}
-		fprintf(output, "\n");
+			fprintf(output, "\n");
 	}
 	// Terminé de escribir el archivo.
-	
-	
+       
+       
     if (need_close) fclose(output);
     return 0;
 }
