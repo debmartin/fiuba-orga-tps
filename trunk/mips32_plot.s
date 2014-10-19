@@ -148,6 +148,8 @@ li v0, SYS_exit
 syscall
 
 
+.end mips32_plot
+
 
 .rdata
 #define LARGO_P2 3
