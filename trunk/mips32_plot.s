@@ -1,22 +1,26 @@
 #include <mips/regdef.h>
 #include <sys/syscall.h>
 .abicalls
+
 .text
 .align 2
+
 .global mips32_plot
 .entity mips32_plot
+
 mips32_plot:
-#define FRAME_SPACE ...
+
+#define FRAME_SPACE 40
 .frame $fp, FRAME_SPACE, ra
+subu sp, sp, FRAME_SPACE		# Pongo el stack pointer al final de mi frame.
 #.cpload t9
-.cprestore FRAME_SPACE-Padding-$(del ra)-4(del fp)
-sw $fp, FRAME_SPACE-Padding-4(del ra)
-sw ra, FRAME_SPACE-Padding
-#Pongo el stack pointer al final de mi frame.
-subu sp, sp, FRAME_SPACE
+.cprestore 24
+sw $fp, 28(sp)
+sw ra, 32(sp)
+
 #Pongo el frame pointer al final de mi frame.
-add $fp, sp, zero
-sw a0, FRAME_SPACE($fp)
+or $fp, sp, zero
+
 
 #Offset dentro de la estructura param.
 #define OFF_UPPER_LEFT_REAL 0		#float: 1 registro f
@@ -33,7 +37,7 @@ sw a0, FRAME_SPACE($fp)
 #define OFF_FILE_NUMBER 112      	#numero: 1 registro
 
 
-
+sw a0, FRAME_SPACE($fp)
 li t0, 0							# T0 es y
 lw t1, OFF_RES_IMAG(a0)				# T1 res_y
 l.s f0, OFF_UPPER_LEFT_IMAG(a0)		# F0 para upper_left_im
@@ -49,6 +53,14 @@ lw t5, OFF_SHADES(a0)				# T5 para el máximo de grises
 la t6, OFF_OUTPUT_FILE(a0)
 lw t6, OFF_FILE_NUMBER(t0)			# T6 para el file descriptor.
 
+# Imprimo "P2"
+li v0, 15
+move a0, t6
+la a1, p2
+li a2, LARGO_P2
+syscall
+
+### FALTA imprimir res_x, res_y y max_gray.
 
 loop_vertical:
 	beq t0, t1, terminar		# Si y llegó a ser el último pixel, termino.
@@ -86,13 +98,13 @@ loop_vertical:
 					j loop_mandelbrot
 					
 			imprimir_brillo:
-					### Imprimir número
+					### FALTA Imprimir número
 					
 					# Imprimo un enter.
 					li v0, 15
 					move a0, t6
-					la a1, enter      # o dirección del String
-					li a2, LARGO_ENTER      # o largo del String
+					la a1, enter
+					li a2, LARGO_ENTER
 					syscall
 					# Si me devolvió un número negativo en v0, hubo error.
 					blt v0, zero, imprimir_io_error
@@ -107,7 +119,7 @@ aumento_loop_vert:
 	j loop_vertical
 
 
-terminar:  #Se debe hacer el flush
+terminar:  # FALTA Se debe hacer el flush
 
 
 imprimir_io_error:
@@ -124,21 +136,11 @@ li a0, STD_ERR
 la a1, error_file
 li a2, LARGO_FILE_ERROR
 syscall
-ba exit
-
-# Para imprimir Strings:
-li v0, 15
-  ###Supongo que en t0 está el file descriptor
-or a0, t0, zero
-la a1, p2      # o dirección del String
-li a2, LARGO_P2      # o largo del String
-syscall
-# Si me devolvió un número negativo en v0, hubo error.
-blt v0, zero, salida_error
 
 exit:
 li v0, SYS_exit
 syscall
+
 
 
 .rdata
@@ -151,3 +153,18 @@ error_io: .asciiz "i/o error.\n"
 #define LARGO_ENTER
 enter: .asciiz "\n"
 
+
+
+
+
+
+
+# Para imprimir Strings:
+#li v0, 15
+  ###Supongo que en t0 está el file descriptor
+#or a0, t0, zero
+#la a1, dir_del_string
+#li a2, largo_en_caracteres_del_string
+#syscall
+# Si me devolvió un número negativo en v0, hubo error.
+#blt v0, zero, exit
