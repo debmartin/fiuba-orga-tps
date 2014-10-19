@@ -32,34 +32,34 @@ sw a0, FRAME_SPACE($fp)
 #Offset del numero de archivo dentro de la estructura _sFile
 #define OFF_FILE_NUMBER 112      	#numero: 1 registro
 
-#t0 para el Upper Left Real y lo guardo en el primer lugar de la LTA.
+Guardo el Upper Left Real y lo guardo en el primer lugar de la LTA.
 lw f0, OFF_UPPER_LEFT_REAL(a0)
-sw f0, ... #Principio de la LTA
-#ídem la parte imaginaria, que guardo abajo
+sw f0, ...
+#Guardo la parte imaginaria abajo
 lw f0, OFF_UPPER_LEFT_IMAG(a0)
 sw f0, ...
-# Lower Right real
+# Lower Right real abajo
 lw f0, OFF_LOWER_RIGHT_REAL(a0)
 sw f0, ...
-# Lower Right imag
+# Lower Right imag abajo
 lw f0, OFF_LOWER_RIGHT_IMAG(a0)
 sw f0, ...
-# Scale real
+# Scale real abajo
 lw f0, OFF_SCALE_REAL(a0)
 sw f0, ...
-# Scale imag
+# Scale imag abajo
 lw f0, OFF_SCALE_IMAG(a0)
 sw f0, ...
-# Resolution real
+# Resolution real abajo
 lw t0, OFF_RES_REAL(a0)
 sw t0, ...
-# Resolution imag
+# Resolution imag abajo
 lw t0, OFF_RES_IMAG(a0)
 sw t0, ...
-# Shades
+# Shades abajo
 lw t0, OFF_SHADES(a0)
 sw t0, ...
-#Output file number
+#Output file number abajo
 la t0, OFF_OUTPUT_FILE(a0)
 lw t0, OFF_FILE_NUMBER(t0)
 sw t0, ...
@@ -69,12 +69,12 @@ li t0, 0		# T0 es y
 lw t1, ...		# T1 res_y
 lw t2, ...		# T2 para upper_left_im
 lw t3, ...		# T3 para d_im
-or t4, t2, 0	# T4 copia del up_im para ir modificando (ci)
+or t4, t2, zero	# T4 copia del up_im para ir modificando (ci)
 li t5, 0		# T5 para x	
 lw t6, ...		# T6 para res_x
 lw t7, ...		# T7 para upper_left_re
 lw t8, ...		# T8 para d_re
-or t9, t7, 0	# T9 copia del up_re (cr)
+or t9, t7, xero	# T9 copia del up_re (cr)
 
 loop_vertical:
 	beq t0, t1, terminar		# Si y llegó a ser el último pixel, termino.
@@ -87,12 +87,16 @@ loop_vertical:
 			loop_mandelbrot:
 				...
 	aumento_loop_hor:
+			lw t5, ...			# Recupero x.
+			lw t9, ...			# Recupero cr.
 			add t5, t5, 1		# Aumento x en 1.
 			add t9, t9, t8		# Aumento cr según la escala.
 			j loop_horizontal
 aumento_loop_vert:
+	lw t0, ...			# Recupero y.
+	lw t4, ...			# Recupero ci.
 	add t0, t0, 1		# Aumento y en 1.
-	subu t4, t4, t3		# A la parte imaginaria que teníamos (ci) le resto según la escala.
+	subu t4, t4, t3		# A ci le resto según la escala.
 	j loop_vertical
 
 terminar:		#Se debe hacer el flush
@@ -111,7 +115,7 @@ ba salida_error
 # Para imprimir Strings:
 li v0, 15
   ###Supongo que en t0 está el file descriptor
-add a0, t0, zero
+or a0, t0, zero
 la a1, p2      # o dirección del String
 li a2, LARGO_P2      # o largo del String
 syscall
@@ -128,5 +132,6 @@ syscall
 p2: .asciiz "P2\n"
 #define LARGO_ERROR 25
 error_file: .asciiz "cannot flush output file.\n"
+#define LARGO_ENTER
 enter: .asciiz "\n"
 
