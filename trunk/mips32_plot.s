@@ -13,7 +13,6 @@ mips32_plot:
 #define FRAME_SPACE 40
 .frame $fp, FRAME_SPACE, ra
 subu sp, sp, FRAME_SPACE		# Pongo el stack pointer al final de mi frame.
-#.cpload t9
 .cprestore 24
 sw $fp, 28(sp)
 sw ra, 32(sp)
@@ -119,8 +118,15 @@ aumento_loop_vert:
 	j loop_vertical
 
 
-terminar:  # FALTA Se debe hacer el flush
-
+terminar:  
+	
+	### FALTA Se debe hacer el flush
+	
+	lw ra, 32($fp)
+	lw gp, 24($fp)
+	lw $fp, 28($fp)
+	addu sp, sp, FRAME_SPACE
+	jr ra
 
 imprimir_io_error:
 li v0, 15
