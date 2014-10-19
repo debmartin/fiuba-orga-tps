@@ -32,85 +32,99 @@ sw a0, FRAME_SPACE($fp)
 #Offset del numero de archivo dentro de la estructura _sFile
 #define OFF_FILE_NUMBER 112      	#numero: 1 registro
 
-Guardo el Upper Left Real y lo guardo en el primer lugar de la LTA.
-lw f0, OFF_UPPER_LEFT_REAL(a0)
-sw f0, ...
-#Guardo la parte imaginaria abajo
-lw f0, OFF_UPPER_LEFT_IMAG(a0)
-sw f0, ...
-# Lower Right real abajo
-lw f0, OFF_LOWER_RIGHT_REAL(a0)
-sw f0, ...
-# Lower Right imag abajo
-lw f0, OFF_LOWER_RIGHT_IMAG(a0)
-sw f0, ...
-# Scale real abajo
-lw f0, OFF_SCALE_REAL(a0)
-sw f0, ...
-# Scale imag abajo
-lw f0, OFF_SCALE_IMAG(a0)
-sw f0, ...
-# Resolution real abajo
-lw t0, OFF_RES_REAL(a0)
-sw t0, ...
-# Resolution imag abajo
-lw t0, OFF_RES_IMAG(a0)
-sw t0, ...
-# Shades abajo
-lw t0, OFF_SHADES(a0)
-sw t0, ...
-#Output file number abajo
-la t0, OFF_OUTPUT_FILE(a0)
-lw t0, OFF_FILE_NUMBER(t0)
-sw t0, ...
 
 
-li t0, 0		# T0 es y
-lw t1, ...		# T1 res_y
-lw t2, ...		# T2 para upper_left_im
-lw t3, ...		# T3 para d_im
-or t4, t2, zero	# T4 copia del up_im para ir modificando (ci)
-li t5, 0		# T5 para x	
-lw t6, ...		# T6 para res_x
-lw t7, ...		# T7 para upper_left_re
-lw t8, ...		# T8 para d_re
-or t9, t7, xero	# T9 copia del up_re (cr)
+li t0, 0							# T0 es y
+lw t1, OFF_RES_IMAG(a0)				# T1 res_y
+l.s f0, OFF_UPPER_LEFT_IMAG(a0)		# F0 para upper_left_im
+l.s f1, OFF_SCALE_IMAG(a0)			# F1 para d_im
+mov.s f2, f0						# F2 copia del up_im para ir modificando (ci)
+li t2, 0							# T2 para x	
+lw t3, OFF_RES_REAL(a0)				# T3 para res_x
+lw f3, OFF_UPPER_LEFT_REAL(a0)		# F3 para upper_left_re
+l.s f4, OFF_SCALE_REAL(a0)			# F4 para d_re
+mov.s f5, f3						# F5 copia del up_re (cr)
+li t4, 0							# T4 para la velocidad de escape.
+lw t5, OFF_SHADES(a0)				# T5 para el máximo de grises
+la t6, OFF_OUTPUT_FILE(a0)
+lw t6, OFF_FILE_NUMBER(t0)			# T6 para el file descriptor.
+
 
 loop_vertical:
 	beq t0, t1, terminar		# Si y llegó a ser el último pixel, termino.
-	sw t0, ...		# Guardo el y en la LTA porque necesito más registros.
-	sw t7, ...		# Guardo el ci en la LTA para usar el registro.
 	loop_horizontal:
-			beq t5, t6, aumento_loop_vert
-			sw t5, ...		# Guardo x en la LTA para poder usar el registro.
-			sw t9, ...		# Guardo cr en la LTA para usar el registro.
+			beq t2, t3, aumento_loop_vert
+			
+			mov.s f6, f2			# F6 guarda la copia del ci (zi)
+			mov.s f7, f5			# F7 guarda la copia del cr (zr)
 			loop_mandelbrot:
-				...
+					beq t4, t5, imprimir_brillo
+					
+					# Calculo el módulo
+					mul.s f8, f6, f6		# F8 guarda zi*zi
+					mul.s f9, f7, f7		# F9 guarda zr*zr
+					add.s f10, f8, f9		# F10 guarda zi*zi+zr*zr
+					li.s f11, 4.0			# F11 guarda 4
+					c.lt.s f10, f11			# Si F10<F11 pone el flag en true.
+					bclf imprimir_brillo	# Va a imprimir brillo si el flag es false, es decir, si el módulo es mayor a 4.
+					
+					mul.s f10, f8, f6		# F10 guarda zi*zi*zi
+					mul.s f11, f9, f7		# F11 guarda zr*zr*zr
+					mul.s f12, f8, f7		# F12 guarda zi*zi*zr
+					mul.s f13, f9, f6		# F13 guarda zr*zr*zi
+					li.s f14, 3.0			# F14 guarda 3
+					mul.s f12, f14, f12		# F12 guarda 3*zi*zi*zr
+					mul.s f13, f14, f13		# F13 guarda 3*zr*zr*zi
+					sub.s f11, f11, f12		# F11 guarda zr*zr*zr - 3*zi*zi*zr
+					add.s f11, f11, f5		# F11 guarda sr
+					sub.s f13, f13, f10		# F13 guarda 3*zr*zr*zi - zi*zi*zi
+					add.s f13, f13, f2		# F13 guarda si
+					mov.s f6, f13
+					mov.s f7, f11
+					
+					add t4, t4, 1			# Aumento la velocidad de escape en 1
+					j loop_mandelbrot
+					
+			imprimir_brillo:
+					### Imprimir número
+					
+					# Imprimo un enter.
+					li v0, 15
+					move a0, t6
+					la a1, enter      # o dirección del String
+					li a2, LARGO_ENTER      # o largo del String
+					syscall
+					# Si me devolvió un número negativo en v0, hubo error.
+					blt v0, zero, imprimir_io_error
+					
 	aumento_loop_hor:
-			lw t5, ...			# Recupero x.
-			lw t9, ...			# Recupero cr.
-			add t5, t5, 1		# Aumento x en 1.
-			add t9, t9, t8		# Aumento cr según la escala.
+			add t2, t2, 1		# Aumento x en 1.
+			add.s f5, f5, d_re	# Aumento cr según la escala.
 			j loop_horizontal
 aumento_loop_vert:
-	lw t0, ...			# Recupero y.
-	lw t4, ...			# Recupero ci.
 	add t0, t0, 1		# Aumento y en 1.
-	subu t4, t4, t3		# A ci le resto según la escala.
+	sub.s f2, f2, f1		# A ci le resto según la escala.
 	j loop_vertical
 
-terminar:		#Se debe hacer el flush
+
+terminar:  #Se debe hacer el flush
 
 
+imprimir_io_error:
+li v0, 15
+li a0, STD_ERR
+la a1, error_io
+li a2, LARGO_IO_ERROR
+syscall
+ba exit
 
-
-# Para imprimir error:
+imprimir_file_error:
 li v0, 15
 li a0, STD_ERR
 la a1, error_file
-li a2, LARGO_ERROR
+li a2, LARGO_FILE_ERROR
 syscall
-ba salida_error
+ba exit
 
 # Para imprimir Strings:
 li v0, 15
@@ -122,7 +136,7 @@ syscall
 # Si me devolvió un número negativo en v0, hubo error.
 blt v0, zero, salida_error
 
-salida_error:
+exit:
 li v0, SYS_exit
 syscall
 
@@ -130,8 +144,10 @@ syscall
 .rdata
 #define LARGO_P2 3
 p2: .asciiz "P2\n"
-#define LARGO_ERROR 25
+#define LARGO_FILE_ERROR 25
 error_file: .asciiz "cannot flush output file.\n"
+#define LARGO_IO_ERROR 11
+error_io: .asciiz "i/o error.\n"
 #define LARGO_ENTER
 enter: .asciiz "\n"
 
