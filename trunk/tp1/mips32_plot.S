@@ -123,7 +123,7 @@ loop_vertical:
 	#define OFF_FRAME_X 24
 	#define OFF_FRAME_RES_X 28
 	#define OFF_FRAME_VEL 32
-			
+		guardar:	
 			sw t0, OFF_FRAME_Y($fp)
 			sw t1, OFF_FRAME_RES_Y($fp)
 			sw t2, OFF_FRAME_X($fp)
@@ -131,9 +131,10 @@ loop_vertical:
 			sw t4, OFF_FRAME_VEL($fp)
 			
 			move t8, t4
-			li t9, imprimir_enter
+			li t9, recargar
 			j imprimir_numero
 		
+		recargar:
 			lw t0, OFF_FRAME_Y($fp)
 			lw t1, OFF_FRAME_RES_Y($fp)
 			lw t2, OFF_FRAME_X($fp)
