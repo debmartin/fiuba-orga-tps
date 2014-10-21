@@ -107,9 +107,8 @@ loop_vertical:
 			mul.s $f18, $f14, $f14 # F18 guarda zr*zr
 			add.s $f20, $f16, $f18 # F20 guarda zi*zi+zr*zr
 			li.s $f22, 4.0 # F22 guarda 4
-			c.lt.s $f20, $f22 # Si F20<F22 pone el flag en true.
-			#bclf imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el módulo es mayor a 4.
-			bge $20, $22, imprimir_brillo
+			c.lt.s $f22, $f2 # Si F22<F20 pone el flag en true.
+			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el módulo es mayor a 4.
 
 			mul.s $f20, $f12, $f16 # F20 guarda zi*zi*zi
 			mul.s $f22, $f14, $f18 # F22 guarda zr*zr*zr
@@ -195,7 +194,7 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		syscall
 		# Si me devolvió un número no nulo en a3, hubo error.
 		bne a3, zero, imprimir_io_error
-    blt v0, a2, imprimir_io_error
+		blt v0, a2, imprimir_io_error
 		
 	proximo:
 		move t8, t2
@@ -270,5 +269,6 @@ error_io: .asciiz "i/o error.\n"
 #la a1, dir_del_string
 #li a2, largo_en_caracteres_del_string
 #syscall
-# Si me devolvió un número negativo en v0, hubo error.
+# Si me devolvió un número no nulo en a3, hubo error.
 #bne a3, zero, exit
+#blt v0, a2, exit
