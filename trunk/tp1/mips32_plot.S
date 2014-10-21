@@ -150,15 +150,6 @@ loop_vertical:
 			lw t2, OFF_FRAME_X($fp)
 			lw t3, OFF_FRAME_RES_X($fp)
 			lw t4, OFF_FRAME_VEL($fp)
-		
-		imprimir_enter:
-			li v0, SYS_write
-			move a0, t6
-			la a1, enter
-			li a2, LARGO_ENTER
-			syscall
-			# Si me devolvió un número negativo en v0, hubo error.
-			bne a3, zero, imprimir_io_error
 
 	aumento_loop_hor:
 		add t2, t2, 1 		# Aumento x en 1.
@@ -210,7 +201,16 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		j imp_cifra
 	
 	volver:
-		jr t9
+    # Imprimo un enter.
+    li v0, SYS_write
+		 move a0, t6
+		la a1, enter
+		li a2, LARGO_ENTER
+		syscall
+		# Si me devolvió un número negativo en v0, hubo error.
+		bne a3, zero, imprimir_io_error
+		
+    jr t9
 
 
 STD_ERR = 2		
