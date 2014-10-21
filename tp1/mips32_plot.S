@@ -58,8 +58,9 @@ imprimir_p2:
 	la a1, p2
 	li a2, LARGO_P2
 	syscall
-	# Si me devolvió un número negativo en v0, hubo error.
+	# Si me devolvió un número no nulo en a3, hubo error.
 	bne a3, zero, imprimir_io_error
+  blt v0, a2, imprimir_io_error
 	lw a0, FRAME_SPACE($fp) #recargo a0 con la estructura porque en el imprimir se pisa
 
 imprimir_res_x:
@@ -192,8 +193,9 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		lw a1, 0(t4)
 		li a2, LARGO_NUM
 		syscall
-		# Si me devolvió un número negativo en v0, hubo error.
+		# Si me devolvió un número no nulo en a3, hubo error.
 		bne a3, zero, imprimir_io_error
+    blt v0, a2, imprimir_io_error
 		
 	proximo:
 		move t8, t2
@@ -207,8 +209,9 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		la a1, enter
 		li a2, LARGO_ENTER
 		syscall
-		# Si me devolvió un número negativo en v0, hubo error.
+		# Si me devolvió un número no nulo en a3, hubo error.
 		bne a3, zero, imprimir_io_error
+    blt v0, a2, imprimir_io_error
 		
     jr t9
 
