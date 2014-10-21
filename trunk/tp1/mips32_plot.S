@@ -51,9 +51,6 @@ l.s $f8, OFF_SCALE_REAL(a0) # F8 para d_re
 
 lw t6, OFF_OUTPUT_FILE(a0)
 lh t6, OFF_FILE_NUMBER(t6) # T6 para el file descriptor.
-lw t3, OFF_RES_REAL(a0)
-lw t1, OFF_RES_IMAG(a0)
-lw t5, OFF_SHADES(a0)
 
 imprimir_p2:
 	li v0, SYS_write
@@ -63,31 +60,35 @@ imprimir_p2:
 	syscall
 	# Si me devolvió un número negativo en v0, hubo error.
 	bne a3, zero, imprimir_io_error
+	lw a0, FRAME_SPACE($fp) #recargo a0 con la estructura porque en el imprimir se pisa
 
 imprimir_res_x:
-	move t8, t3
+	lw t8, OFF_RES_REAL(a0)
 	la t9, imprimir_res_y
 	j imprimir_numero
+	lw a0, FRAME_SPACE($fp)
 	
 imprimir_res_y:
-	move t8, t1
+	lw t8, OFF_RES_IMAG(a0)
 	la t9, imprimir_max_gray
 	j imprimir_numero
+	lw a0, FRAME_SPACE($fp)
 	
 imprimir_max_gray:
-	move t8, t5
+	lw t8, OFF_SHADES(a0)
 	la t9, empezar
 	j imprimir_numero
+	lw a0, FRAME_SPACE($fp)
 
 empezar:
 	li t0, 0 				# T0 es y
-	#lw t1, OFF_RES_IMAG(a0) # T1 res_y
+	lw t1, OFF_RES_IMAG(a0) # T1 res_y
 	mov.s $f4, $f0 			# F4 copia del up_im para ir modificando (ci)
 	li t2, 0 				# T2 para x
-	#lw t3, OFF_RES_REAL(a0) # T3 para res_x
+	lw t3, OFF_RES_REAL(a0) # T3 para res_x
 	mov.s $f10, $f6 		# F10 copia del up_re (cr)
 	li t4, 0 				# T4 para la velocidad de escape.
-	#lw t5, OFF_SHADES(a0)	# T5 para el máximo de grises
+	lw t5, OFF_SHADES(a0)	# T5 para el máximo de grises
 
 loop_vertical:
 	beq t0, t1, terminar # Si y llegó a ser el último pixel, termino.
@@ -187,10 +188,6 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		beq t0, 0, volver	# Si ya imprimió todo, vuelve al programa.
 		divu t1, t8, t0		# T1 para el cociente de num/div
 		rem t2, t8, t0		# T2 para el resto de num/div
-	proximo:
-		move t8, t2
-		divu t0, t0, 10		# Para testear la siguiente cifra.
-		j imp_cifra
 	escribir_num:
 		# El número a imprimir está en T1
 		la t3, numeros		# T3 para la dirección del arreglo.
@@ -206,7 +203,12 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		syscall
 		# Si me devolvió un número negativo en v0, hubo error.
 		bne a3, zero, imprimir_io_error
-		j proximo
+		
+	proximo:
+		move t8, t2
+		divu t0, t0, 10		# Para testear la siguiente cifra.
+		j imp_cifra
+	
 	volver:
 		jr t9
 
