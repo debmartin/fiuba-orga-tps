@@ -1,0 +1,4 @@
+El imprime correctamente "P2\n". Luego al tratar de imprimir un número
+salta a la etiqueta imprimir_numero. Allí hace los cálculos para pasar
+el entero a ascii. Pero al intentar imprimirlo, el resultado del syscall
+es distinto de 0, por lo que imprime el mensaje "i/o error".
