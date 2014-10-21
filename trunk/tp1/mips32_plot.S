@@ -38,7 +38,7 @@ OFF_RES_IMAG = 28 				#size_t = unsigned: 1 registros
 OFF_SHADES = 32 					#size_t = unsigned: 1 registros
 OFF_OUTPUT_FILE = 36 				#puntero: 1 registro
 #Offset del numero de archivo dentro de la estructura _sFile
-OFF_FILE_NUMBER = 14 			#numero: 1 registro
+OFF_FILE_NUMBER = 14 			#short int: 1/2 registro
 
 
 sw a0, FRAME_SPACE($fp)
