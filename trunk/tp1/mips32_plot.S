@@ -34,11 +34,11 @@ OFF_LOWER_RIGHT_IMAG = 12 		#float: 1 registro f
 OFF_SCALE_REAL = 16 				#float: 1 registro f
 OFF_SCALE_IMAG = 20 				#float: 1 registro f
 OFF_RES_REAL = 24 				#size_t = unsigned: 1 registros
-OFF_RES_IMAG = 32 				#size_t = unsigned: 1 registros
-OFF_SHADES = 40 					#size_t = unsigned: 1 registros
-OFF_OUTPUT_FILE = 48 				#puntero: 1 registro
+OFF_RES_IMAG = 28 				#size_t = unsigned: 1 registros
+OFF_SHADES = 32 					#size_t = unsigned: 1 registros
+OFF_OUTPUT_FILE = 36 				#puntero: 1 registro
 #Offset del numero de archivo dentro de la estructura _sFile
-OFF_FILE_NUMBER = 112 			#numero: 1 registro
+OFF_FILE_NUMBER = 14 			#numero: 1 registro
 
 
 sw a0, FRAME_SPACE($fp)
@@ -50,7 +50,7 @@ l.s $f6, OFF_UPPER_LEFT_REAL(a0) # F6 para upper_left_re
 l.s $f8, OFF_SCALE_REAL(a0) # F8 para d_re
 
 lw t6, OFF_OUTPUT_FILE(a0)
-lh t6, OFF_FILE_NUMBER(a0) # T6 para el file descriptor.
+lh t6, OFF_FILE_NUMBER(t6) # T6 para el file descriptor.
 
 imprimir_p2:
 	li v0, SYS_write
