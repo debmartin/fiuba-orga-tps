@@ -237,16 +237,16 @@ p2: .asciiz "P2\n"
 .align 2
 
 numeros: .word cero, uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve
-cero: .asciiz "0"
-uno: .asciiz "1"
-dos: .asciiz "2"
-tres: .asciiz "3"
-cuatro: .asciiz "4"
-cinco: .asciiz "5"
-seis: .asciiz "6"
-siete: .asciiz "7"
-ocho: .asciiz "8"
-nueve: .asciiz "9"
+cero: .ascii "0"
+uno: .ascii "1"
+dos: .ascii "2"
+tres: .ascii "3"
+cuatro: .ascii "4"
+cinco: .ascii "5"
+seis: .ascii "6"
+siete: .ascii "7"
+ocho: .ascii "8"
+nueve: .ascii "9"
 
 
 enter: .asciiz "\n"
