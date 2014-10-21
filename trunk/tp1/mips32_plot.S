@@ -210,7 +210,7 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 
 STD_ERR = 2		
 imprimir_io_error:
-	li v0, 15
+	li v0, SYS_write
 	li a0, STD_ERR
 	la a1, error_io
 	li a2, LARGO_IO_ERROR
