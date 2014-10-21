@@ -51,6 +51,9 @@ l.s $f8, OFF_SCALE_REAL(a0) # F8 para d_re
 
 lw t6, OFF_OUTPUT_FILE(a0)
 lh t6, OFF_FILE_NUMBER(t6) # T6 para el file descriptor.
+lw t3, OFF_RES_REAL(a0)
+lw t1, OFF_RES_IMAG(a0)
+lw t5, OFF_SHADES(a0)
 
 imprimir_p2:
 	li v0, SYS_write
@@ -62,29 +65,29 @@ imprimir_p2:
 	bne a3, zero, imprimir_io_error
 
 imprimir_res_x:
-	lw t8, OFF_RES_REAL(a0)
+	move t8, t3
 	la t9, imprimir_res_y
 	j imprimir_numero
 	
 imprimir_res_y:
-	lw t8, OFF_RES_IMAG(a0)
+	move t8, t1
 	la t9, imprimir_max_gray
 	j imprimir_numero
 	
 imprimir_max_gray:
-	lw t8, OFF_SHADES(a0)
+	move t8, t5
 	la t9, empezar
 	j imprimir_numero
 
 empezar:
 	li t0, 0 				# T0 es y
-	lw t1, OFF_RES_IMAG(a0) # T1 res_y
+	#lw t1, OFF_RES_IMAG(a0) # T1 res_y
 	mov.s $f4, $f0 			# F4 copia del up_im para ir modificando (ci)
 	li t2, 0 				# T2 para x
-	lw t3, OFF_RES_REAL(a0) # T3 para res_x
+	#lw t3, OFF_RES_REAL(a0) # T3 para res_x
 	mov.s $f10, $f6 		# F10 copia del up_re (cr)
 	li t4, 0 				# T4 para la velocidad de escape.
-	lw t5, OFF_SHADES(a0)	# T5 para el máximo de grises
+	#lw t5, OFF_SHADES(a0)	# T5 para el máximo de grises
 
 loop_vertical:
 	beq t0, t1, terminar # Si y llegó a ser el último pixel, termino.
