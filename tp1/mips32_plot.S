@@ -20,7 +20,7 @@ sw ra, 48(sp)
 #Pongo el frame pointer al final de mi frame.
 or $fp, sp, zero
 
-# Información de datos
+# InformaciÃ³n de datos
 LARGO_NUM = 1
 LARGO_P2 = 3
 LARGO_ENTER = 1
@@ -58,9 +58,9 @@ imprimir_p2:
 	la a1, p2
 	li a2, LARGO_P2
 	syscall
-	# Si me devolvió un número no nulo en a3, hubo error.
+	# Si me devolviÃ³ un nÃºmero no nulo en a3, hubo error.
 	bne a3, zero, imprimir_io_error
-  blt v0, a2, imprimir_io_error
+  	blt v0, a2, imprimir_io_error
 	lw a0, FRAME_SPACE($fp) #recargo a0 con la estructura porque en el imprimir se pisa
 
 imprimir_res_x:
@@ -89,10 +89,10 @@ empezar:
 	lw t3, OFF_RES_REAL(a0) # T3 para res_x
 	mov.s $f10, $f6 		# F10 copia del up_re (cr)
 	li t4, 0 				# T4 para la velocidad de escape.
-	lw t5, OFF_SHADES(a0)	# T5 para el máximo de grises
+	lw t5, OFF_SHADES(a0)	# T5 para el mÃ¡ximo de grises
 
 loop_vertical:
-	beq t0, t1, terminar # Si y llegó a ser el último pixel, termino.
+	beq t0, t1, terminar # Si y llegÃ³ a ser el Ãºltimo pixel, termino.
 	loop_horizontal:
 		beq t2, t3, aumento_loop_vert
 
@@ -102,13 +102,13 @@ loop_vertical:
 		loop_mandelbrot:
 			beq t4, t5, imprimir_brillo
 
-			# Calculo el módulo
+			# Calculo el mÃ³dulo
 			mul.s $f16, $f12, $f12 # F16 guarda zi*zi
 			mul.s $f18, $f14, $f14 # F18 guarda zr*zr
 			add.s $f20, $f16, $f18 # F20 guarda zi*zi+zr*zr
 			li.s $f22, 4.0 # F22 guarda 4
-			c.lt.s $f22, $f2 # Si F22<F20 pone el flag en true.
-			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el módulo es mayor a 4.
+			c.lt.s $f22, $f20 # Si F22<F20 pone el flag en true.
+			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el mÃ³dulo es mayor a 4.
 
 			mul.s $f20, $f12, $f16 # F20 guarda zi*zi*zi
 			mul.s $f22, $f14, $f18 # F22 guarda zr*zr*zr
@@ -153,11 +153,11 @@ loop_vertical:
 
 	aumento_loop_hor:
 		add t2, t2, 1 		# Aumento x en 1.
-		add.s $f10, $f10, $f8 	# Aumento cr según la escala.
+		add.s $f10, $f10, $f8 	# Aumento cr segÃºn la escala.
 		j loop_horizontal
 aumento_loop_vert:
 	add t0, t0, 1 		# Aumento y en 1.
-	sub.s $f4, $f4, $f2 	# A ci le resto según la escala.
+	sub.s $f4, $f4, $f2 	# A ci le resto segÃºn la escala.
 	j loop_vertical
 
 
@@ -168,31 +168,31 @@ terminar:
 	addu sp, sp, FRAME_SPACE
 	jr ra
 
-MAX_DIV = 100		# Es el máximo divisor de acuerdo a la cantidad máxima de cifras que puede tener el número a imprimir.
+MAX_DIV = 100		# Es el mÃ¡ximo divisor de acuerdo a la cantidad mÃ¡xima de cifras que puede tener el nÃºmero a imprimir.
 
 imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0, T1, T2, T3 y T4
 # T6 es el archivo donde debo imprimir.
-# T8 tiene el número de 3 cifras máximo.
+# T8 tiene el nÃºmero de 3 cifras mÃ¡ximo.
 # T9 tiene a donde debo volver para seguir ejecutando el programa.
 	li t0, MAX_DIV		# T0 para el divisor.
 	imp_cifra:
-		beq t0, 0, volver	# Si ya imprimió todo, vuelve al programa.
+		beq t0, 0, volver	# Si ya imprimiÃ³ todo, vuelve al programa.
 		divu t1, t8, t0		# T1 para el cociente de num/div
 		rem t2, t8, t0		# T2 para el resto de num/div
 	escribir_num:
-		# El número a imprimir está en T1
-		la t3, numeros		# T3 para la dirección del arreglo.
-		# La posición en el arreglo es número por 4 (ya que cada palabra son 4 bytes).
-		sll t4, t1, 2		# T4 tiene la poscición del número en el arreglo.
-		addu t4, t3, t4		# T4 tiene la dirección donde está la dirección de la etiqueta del número.
-		lw t4, 0(t4)		# T4 tiene dirección de la etiqueta del número.
+		# El nÃºmero a imprimir estÃ¡ en T1
+		la t3, numeros		# T3 para la direcciÃ³n del arreglo.
+		# La posiciÃ³n en el arreglo es nÃºmero por 4 (ya que cada palabra son 4 bytes).
+		sll t4, t1, 2		# T4 tiene la posciciÃ³n del nÃºmero en el arreglo.
+		addu t4, t3, t4		# T4 tiene la direcciÃ³n donde estÃ¡ la direcciÃ³n de la etiqueta del nÃºmero.
+		lw t4, 0(t4)		# T4 tiene direcciÃ³n de la etiqueta del nÃºmero.
 		
 		li v0, SYS_write
 		move a0, t6
 		lw a1, 0(t4)
 		li a2, LARGO_NUM
 		syscall
-		# Si me devolvió un número no nulo en a3, hubo error.
+		# Si me devolviÃ³ un nÃºmero no nulo en a3, hubo error.
 		bne a3, zero, imprimir_io_error
 		blt v0, a2, imprimir_io_error
 		
@@ -208,7 +208,7 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		la a1, enter
 		li a2, LARGO_ENTER
 		syscall
-		# Si me devolvió un número no nulo en a3, hubo error.
+		# Si me devolviÃ³ un nÃºmero no nulo en a3, hubo error.
 		bne a3, zero, imprimir_io_error
     blt v0, a2, imprimir_io_error
 		
@@ -264,11 +264,11 @@ error_io: .asciiz "i/o error.\n"
 
 # Para imprimir Strings:
 #li v0, SYS_write
-###Supongo que en t0 está el file descriptor
+###Supongo que en t0 estÃ¡ el file descriptor
 #or a0, t0, zero
 #la a1, dir_del_string
 #li a2, largo_en_caracteres_del_string
 #syscall
-# Si me devolvió un número no nulo en a3, hubo error.
+# Si me devolviÃ³ un nÃºmero no nulo en a3, hubo error.
 #bne a3, zero, exit
 #blt v0, a2, exit
