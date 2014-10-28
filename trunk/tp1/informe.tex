@@ -28,20 +28,18 @@ Constantino, Guillermo, \textit{Padr\'on Nro. 89776} \\
 \maketitle
 \thispagestyle{empty} % quita el nmero en la primer pagina
 
-\newpage
-\tableofcontents
-\newpage
-\includepdf[pages={-}]{./Enunciado.pdf}
-
 \begin{abstract}
 El presente trabajo tiene como objetivo familiarizarse con el conjunto de instrucciones MIPS y el concepto de ABI, extendiendo un programa escrito en C que resuelva el problema del conjunto de Multibrot de orden 3, ocupándose de la funci\'on que calcula la velocidad de escape e imprime en el archivo de la salida lo correspondiente.
 
 \end{abstract}
 
+\cleardoublepage
+\setcounter{page}{0}
+\newpage
+\tableofcontents
+\newpage
+\includepdf[pages={-}, pagecommand={\thispagestyle{empty}}, addtotoc={1, section, 1, Enunciado, enunciado}]{./Enunciado.pdf}
 
-
-
-\setcounter{page}{2}
 \section{Introducci\'on}
 Al comenzar a utilizar nuevas herramientas, en cualquier \'ambito, es necesaria una breve introducci\'on al funcionamiento de las mismas: tener una noci\'on de las prestaciones que ofrecen, asi tambi\'en como de sus limitaciones.\\
 En este trabajo pr\'actico continuamos con las nuevas herramientas, esta vez con el objetivo de 
@@ -83,12 +81,66 @@ respetando las convenciones ABI y descifrando los tamaños de las distintas secc
 cu\'anta informaci\'on era necesaria descargar en el frame.
 Finalmente el frame qued\'o distribuido de la siguiente forma:
 
-!!!!!!!!!! ACÁ IRÍA LA TABLA
+\begin{itemize}
+\item \textbf{SRA}
+\begin{center}
+\begin{tabular}{ r | c | c | l }
+  \cline{2-2}                       
+  52 & padd& & \\ \cline{2-2}
+  48 & ra & &  16 \\ \cline{2-2}
+  44 & fp& & \\ \cline{2-2}
+  40 & sp & &\\
+  \cline{2-2}
+\end{tabular}
+\end{center}
 
+\item \textbf{ABA}
+\begin{center}
+\begin{tabular}{ r | p{1cm} | c | l }
+  \cline{2-2}                       
+  12 &  & & \\ \cline{2-2}
+  8 &   & &  16 \\ \cline{2-2}
+  4 &  & & \\ \cline{2-2}
+  0 &   & &\\
+  \cline{2-2}
+\end{tabular}
+\end{center}
+
+\item \textbf{LTA}
+\begin{center}
+\begin{tabular}{ r | c | c | l }
+  \cline{2-2}                       
+  36 & padd& & \\ \cline{2-2}
+  32 & vel & &   \\ \cline{2-2}
+  28 & res\_x & & 24 \\ \cline{2-2}
+  24 & x & &\\ \cline{2-2}
+  20 & res\_y & & \\ \cline{2-2}
+  16 & y & &\\
+  \cline{2-2}
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tabular}{ r | p{1cm} | c | l }
+  \cline{2-2}              
+   & & & \\        
+   & SRA & & \\ 
+   & & & \\ \cline{2-2}
+   & & & \\ 
+   & LTA & &  56 \\ 
+   & & & \\ \cline{2-2}
+   & & & \\ 
+   & ABA & &\\
+   & & & \\ 
+  \cline{2-2}
+\end{tabular}
+\end{center}
+
+\end{itemize}
 
 \section{C\'odigo assembly}
 Para generar el ejecutable del programa se utiliz\'o el makefile prove\'ido de forma que se tome 
-el c\'odigo de mips32_plot.S en vez de mips32_plot.c. 
+el c\'odigo de $mips32_plot.S$ en vez de $mips32_plot.c$. 
 Para tratar la impresi\'on de strings, se decidi\'o copiar el c\'odigo necesario cada vez que se quer\'ia 
 imprimir porque no ocupaba m\'as de 8 l\'ineas de c\'odigo. A diferencia de la transformaci\'on 
 necesaria de n\'umero a cadena que se requer\'ia en varias oportunidades que levaba bastantes l\'ineas m\'as. 
@@ -114,13 +166,11 @@ deb\'ia resultar la imagen y probar el programa.\\
 \begin{verbatim}
 > tp1-2014-2-bin -o uno.pgm
 \end{verbatim}
-\\
 
 2. En este caso generamos una imagen que comprenda desde -0.625 + 0.625i hasta -0.575 + 0.575i:
 \begin{verbatim}
 > tp1-2014-2-bin --center -0.6+0.6i --width 0.05 --height 0.05 -o dos.pgm
 \end{verbatim}
-\\
 
 
 
@@ -190,7 +240,8 @@ imprimir_p2:
 	# Si me devolvió un número no nulo en a3, hubo error.
 	bne a3, zero, imprimir_io_error
   	blt v0, a2, imprimir_io_error
-	lw a0, FRAME_SPACE($fp) #recargo a0 con la estructura porque en el imprimir se pisa
+	lw a0, FRAME_SPACE($fp) #recargo a0 con la estructura porque en el 
+	# imprimir se pisa
 
 imprimir_res_x:
 	lw t8, OFF_RES_REAL(a0)
@@ -237,7 +288,8 @@ loop_vertical:
 			add.s $f20, $f16, $f18 # F20 guarda zi*zi+zr*zr
 			li.s $f22, 4.0 # F22 guarda 4
 			c.lt.s $f22, $f20 # Si F22<F20 pone el flag en true.
-			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el módulo es mayor a 4.
+			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir,
+			# si el módulo es mayor a 4.
 
 			mul.s $f20, $f12, $f16 # F20 guarda zi*zi*zi
 			mul.s $f22, $f14, $f18 # F22 guarda zr*zr*zr
@@ -297,9 +349,11 @@ terminar:
 	addu sp, sp, FRAME_SPACE
 	jr ra
 
-MAX_DIV = 100		# Es el máximo divisor de acuerdo a la cantidad máxima de cifras que puede tener el número a imprimir.
+MAX_DIV = 100		# Es el máximo divisor de acuerdo a la cantidad máxima de 
+# cifras que puede tener el número a imprimir.
 
-imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0, T1, T2, T3 y T4
+imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa
+# registros T0, T1, T2, T3 y T4
 # T6 es el archivo donde debo imprimir.
 # T8 tiene el número de 3 cifras máximo.
 # T9 tiene a donde debo volver para seguir ejecutando el programa.
@@ -313,7 +367,8 @@ imprimir_numero:	# Recibe registros T6, T8 (y lo cambia) y T9; usa registros T0,
 		la t3, numeros		# T3 para la dirección del arreglo.
 		# La posición en el arreglo es número por 4 (ya que cada palabra son 4 bytes).
 		sll t4, t1, 2		# T4 tiene la poscición del número en el arreglo.
-		addu t4, t3, t4		# T4 tiene la dirección donde está la dirección de la etiqueta del número.
+		addu t4, t3, t4		# T4 tiene la dirección donde está la dirección de la
+		# etiqueta del número.
 		lw t4, 0(t4)		# T4 tiene dirección de la etiqueta del número.
 		
 		li v0, SYS_write
