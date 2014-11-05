@@ -108,7 +108,7 @@ loop_vertical:
 			add.s $f20, $f16, $f18 # F20 guarda zi*zi+zr*zr
 			li.s $f22, 4.0 # F22 guarda 4
 			c.lt.s $f22, $f20 # Si F22<F20 pone el flag en true.
-			bclt imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el mÃ³dulo es mayor a 4.
+			bc1t imprimir_brillo # Va a imprimir brillo si el flag es true, es decir, si el mÃ³dulo es mayor a 4.
 
 			mul.s $f20, $f12, $f16 # F20 guarda zi*zi*zi
 			mul.s $f22, $f14, $f18 # F22 guarda zr*zr*zr
