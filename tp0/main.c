@@ -35,13 +35,13 @@ int main(int argc, char* argv[]){
     FILE* output = stdout;
 
     bool need_close = false;
-    char option, i;
+    char option, i_str, mas, por;
     int option_index;
 
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                if (sscanf(optarg, "%d%*c%d", &resolutionX, &resolutionY) != 2){
+                if (sscanf(optarg, "%d%c%d", &resolutionX, &por, &resolutionY) != 2 || por!='x'){
                     printf("fatal: invalid resolution specification\n");
                     goto usage;
                 }
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
 
                 break;
             case 'c':
-                if (sscanf(optarg, "%f%*c%f%c", &centerX, &centerY, &i) != 3 || i!='i'){
+                if (sscanf(optarg, "%f%c%f%c", &centerX, &mas, &centerY, &i_str) != 3 || i_str!='i' || mas!='+'){
                     printf("fatal: invalid center specification\n");
                     goto usage;
                 }
