@@ -81,8 +81,6 @@ respetando las convenciones ABI y descifrando los tamaños de las distintas secc
 cu\'anta informaci\'on era necesaria descargar en el frame.
 Finalmente el frame qued\'o distribuido de la siguiente forma:
 
-\begin{itemize}
-
 
 \begin{center}
 \begin{tabular}{ r | p{1cm} | c | l }
@@ -100,7 +98,7 @@ Finalmente el frame qued\'o distribuido de la siguiente forma:
 \end{tabular}
 \end{center}
 
-
+\begin{itemize}
 \item \textbf{SRA}
 \begin{center}
 \begin{tabular}{ r | c | c | l }
@@ -146,7 +144,7 @@ Finalmente el frame qued\'o distribuido de la siguiente forma:
 
 \section{C\'odigo assembly}
 Para generar el ejecutable del programa se utiliz\'o el makefile prove\'ido de forma que se tome 
-el c\'odigo de $mips32__plot.S$ en vez de $mips32__plot.c$. 
+el c\'odigo de $mips32\_\_plot.S$ en vez de $mips32\_\_plot.c$. 
 Para tratar la impresi\'on de strings, se decidi\'o copiar el c\'odigo necesario cada vez que se quer\'ia 
 imprimir porque no ocupaba m\'as de 8 l\'ineas de c\'odigo. A diferencia de la transformaci\'on 
 necesaria de n\'umero a cadena que se requer\'ia en varias oportunidades que levaba bastantes l\'ineas m\'as. 

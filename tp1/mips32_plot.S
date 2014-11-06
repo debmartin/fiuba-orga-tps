@@ -108,7 +108,7 @@ loop_vertical:
 			add.s $f20, $f16, $f18 # F20 guarda zi*zi+zr*zr
 			li.s $f22, 4.0 # F22 guarda 4
 			c.lt.s $f22, $f20 # Si F22<F20 pone el flag en true.
-			bc1t imprimir_brillo # Va a imprimir brillo si el flag es true, es decir, si el mÃ³dulo es mayor a 4.
+			bc1t imprimir_brillo # Va a imprimir brillo si el flag es false, es decir, si el mÃ³dulo es mayor a 4.
 
 			mul.s $f20, $f12, $f16 # F20 guarda zi*zi*zi
 			mul.s $f22, $f14, $f18 # F22 guarda zr*zr*zr
@@ -124,7 +124,6 @@ loop_vertical:
 			mov.s $f12, $f26
 			mov.s $f14, $f22
 
-			add t4, t4, 1 # Aumento la velocidad de escape en 1
 			j loop_mandelbrot
 
 		imprimir_brillo:
@@ -152,11 +151,11 @@ loop_vertical:
 			lw t4, OFF_FRAME_VEL($fp)
 
 	aumento_loop_hor:
-		add t2, t2, 1 		# Aumento x en 1.
+		addi t2, t2, 1 		# Aumento x en 1.
 		add.s $f10, $f10, $f8 	# Aumento cr segÃºn la escala.
 		j loop_horizontal
 aumento_loop_vert:
-	add t0, t0, 1 		# Aumento y en 1.
+	addi t0, t0, 1 		# Aumento y en 1.
 	sub.s $f4, $f4, $f2 	# A ci le resto segÃºn la escala.
 	j loop_vertical
 
