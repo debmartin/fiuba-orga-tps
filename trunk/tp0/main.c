@@ -35,13 +35,13 @@ int main(int argc, char* argv[]){
     FILE* output = stdout;
 
     bool need_close = false;
-    char option, i_str, mas, por;
+    char option, i_str, por;
     int option_index;
 
     while ((option = getopt_long(argc, argv, "o:r:c:w:H:", long_options, &option_index)) != -1) {
         switch (option){
             case 'r':
-                if (sscanf(optarg, "%d%c%d", &resolutionX, &por, &resolutionY) != 2 || por!='x'){
+                if (sscanf(optarg, "%d%c%d", &resolutionX, &por,  &resolutionY) != 3 || por!='x'){
                     printf("fatal: invalid resolution specification\n");
                     goto usage;
                 }
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
 
                 break;
             case 'c':
-                if (sscanf(optarg, "%f%c%f%c", &centerX, &mas, &centerY, &i_str) != 3 || i_str!='i' || mas!='+'){
+                if (sscanf(optarg, "%f%f%c", &centerX, &centerY, &i_str) != 3 || i_str!='i'){
                     printf("fatal: invalid center specification\n");
                     goto usage;
                 }
@@ -100,7 +100,7 @@ int main(int argc, char* argv[]){
     first_imaginary_value += height_scale/2;
 
 
-    for(int i = resolutionY-1; i >= 0; i--){
+    for(int i = 0; i <= resolutionY-1; i++){
         for(int j = 0; j < resolutionX; j++){
             float real1 = first_real_value + j * width_scale, imag1 = first_imaginary_value + i * height_scale;
             float real2 = real1, imag2 = imag1;
