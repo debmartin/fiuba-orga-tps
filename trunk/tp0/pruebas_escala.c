@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "velocidad_escape.h"
 
 void imprimir_complejos_del_plano(double centro_real, double centro_imag, double ancho_plano, double alto_plano, int ancho_res, int alto_res, double* v){
 	
