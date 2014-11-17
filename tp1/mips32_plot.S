@@ -103,11 +103,11 @@ empezar:
 	l.s $f0, OFF_UPPER_LEFT_IMAG(a0) 	# F0 para upper_left_im
 	l.s $f2, OFF_SCALE_IMAG(a0) 		# F2 para d_im
 	
-	l.s $f6, OFF_UPPER_LEFT_REAL(a0)	# F6 para upper_left_re
+
 	l.s $f8, OFF_SCALE_REAL(a0) 		# F8 para d_re
 
 	mov.s $f4, $f0 						# F4 copia del up_im para ir modificando (ci)
-	mov.s $f10, $f6 					# F10 copia del up_re (cr)
+
 
 loop_vertical:
 	beq t0, t1, terminar 			# Si y llegó a ser el último pixel, terminó.
@@ -115,7 +115,9 @@ loop_vertical:
 	lw a0, FRAME_SPACE($fp)
 	li t2, 0		 				# T2 para x
 	lw t3, OFF_RES_REAL(a0)			# T3 para res_x
-
+	l.s $f6, OFF_UPPER_LEFT_REAL(a0)	# F6 para upper_left_re
+	mov.s $f10, $f6 					# F10 copia del up_re (cr)
+	
 	loop_horizontal:
 		beq t2, t3, aumento_loop_vert
 
@@ -148,9 +150,9 @@ loop_vertical:
 			mul.s $f24, $f28, $f24 	# F24 guarda 3*zi*zi*zr
 			mul.s $f26, $f28, $f26 	# F26 guarda 3*zr*zr*zi
 			sub.s $f22, $f22, $f24 	# F22 guarda zr*zr*zr - 3*zi*zi*zr
-			add.s $f22, $f22, $f4 	# F22 guarda sr
+			add.s $f22, $f22, $f10 	# F22 guarda sr
 			sub.s $f26, $f26, $f20 	# F26 guarda 3*zr*zr*zi - zi*zi*zi
-			add.s $f26, $f26, $f10 	# F26 guarda si
+			add.s $f26, $f26, $f4 	# F26 guarda si
 			mov.s $f12, $f26
 			mov.s $f14, $f22
 			
@@ -196,7 +198,7 @@ loop_vertical:
 		j loop_horizontal
 aumento_loop_vert:
 	addi t0, t0, 1 			# Aumento y en 1.
-	add.s $f4, $f4, $f2 	# A ci le sumo según la escala.
+	sub.s $f4, $f4, $f2 	# A ci le sumo según la escala.
 	j loop_vertical
 
 
