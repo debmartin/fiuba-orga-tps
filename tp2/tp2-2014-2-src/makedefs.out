@@ -1,0 +1,8 @@
+# Do not edit -- this file documents how this program was built for your machine.
+SYSTYPE	= LINUX3
+SYSLIBS	= -lc_p -lpthread
+CC	= gcc $(WARN) -pg
+OPT	= -O
+DEBUG	= -g
+EXPORT	= AUXLIBS='-lc_p' CCARGS='-pg' OPT='-O' DEBUG='-g'
+WARN	= -Wall
