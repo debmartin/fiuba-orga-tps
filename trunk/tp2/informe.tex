@@ -6,6 +6,7 @@
 \usepackage[utf8]{inputenc} % Permite escribir directamente áéíóúñ
 \usepackage[hidelinks]{hyperref}
 \usepackage{pdfpages}
+\usepackage{float}
 
 \title{ \textbf{ 6620. Organizaci\'on de Computadoras\\
 Trabajo Pr\'actico 2: \\
@@ -26,24 +27,25 @@ Constantino, Guillermo, \textit{Padr\'on Nro. 89776} \\
 
 \begin{document}
 \maketitle
-\thispagestyle{empty} % quita el número en la primer pagina
-
-\newpage
-\tableofcontents
-\newpage
-\includepdf[pages={-}]{./Enunciado.pdf}
+\thispagestyle{empty} % quita el nmero en la primer pagina
 
 \begin{abstract}
 El presente trabajo tiene como objetivo familiarizarse con assembly x86 SSE mientras se trata con optimizaciones usando programación en paralelo (con $threading$) además de la programación SIMD.
 
 \end{abstract}
 
+\cleardoublepage
+\setcounter{page}{0}
+\newpage
+\tableofcontents
+\newpage
+\includepdf[pages={-}, pagecommand={\thispagestyle{empty}}, addtotoc={1, section, 1, Enunciado, enunciado}]{./Enunciado.pdf}
 
 
 
-\setcounter{page}{2}
+
 \section{Introducci\'on}
-Como primer objetivo, nos proponemos adentrarnos en el funcionamiento del assembly x86 SSE y la programación SIMD, en un entorno Intel. Averiguando sobre cómo el procesamiento SIMD permite trabajar con 4 variables flotantes de simple precisión en paralelo y cuáles son las instrucciones que se presentan para manejarlo en entorno Intel, implementándolo desde C con Assembler Inline, que maneja formato AT&T.\\
+Como primer objetivo, nos proponemos adentrarnos en el funcionamiento del assembly x86 SSE y la programación SIMD, en un entorno Intel. Averiguando sobre cómo el procesamiento SIMD permite trabajar con 4 variables flotantes de simple precisión en paralelo y cuáles son las instrucciones que se presentan para manejarlo en entorno Intel, implementándolo desde C con Assembler Inline, que maneja formato AT\&T.\\
 Luego, aprovechando la programación SIMD y el $threading$ probar distintas formas de procesar la imagen para lograr mejorar el tiempo de ejecución mejorando la parte de plotting de la imagen.
 
 
@@ -52,8 +54,8 @@ Luego, aprovechando la programación SIMD y el $threading$ probar distintas form
 \section{Implementación del programa}
 
 \subsection{Primera parte}
-Se trata de alterar el archivo $sse_plot.c$ y el $generic_plot.c$ para graficar el conjunto de Multibrot de orden 3 en vez del conjunto de Mandelbrot que ahora generan.\\
-En el archivo $generic_plot.c$ se cambió dentro del ciclo la forma de calcular los nuevos zr y zi. De la misma forma es lo único que debía cambiarse en el $sse_plot.c$. El único inconveniente con este segundo archivo es que los registros no alcanzaban para también recibir un vector de 4 números flotantes de simple precisión que contengan el 3 que debe ser usado en el cálculo de los nuevos zr y zi, pero por suerte podía ser obtenido a partir de restar el vector de 4s y 1's que ya se recibían.\\
+Se trata de alterar el archivo $sse\_plot.c$ y el $generic\_plot.c$ para graficar el conjunto de Multibrot de orden 3 en vez del conjunto de Mandelbrot que ahora generan.\\
+En el archivo $generic\_plot.c$ se cambió dentro del ciclo la forma de calcular los nuevos zr y zi. De la misma forma es lo único que debía cambiarse en el $sse\_plot.c$. El único inconveniente con este segundo archivo es que los registros no alcanzaban para también recibir un vector de 4 números flotantes de simple precisión que contengan el 3 que debe ser usado en el cálculo de los nuevos zr y zi, pero por suerte podía ser obtenido a partir de restar el vector de 4s y 1's que ya se recibían.\\
 Finalmente, para que la región barrida por defecto sea la especificada en el enunciado, también se debieron cambiar los parámetros por defecto del archivo $main.c$ sobre las coordenadas de los puntos del extremo superior izquierdo y el extremo inferior derecho.
 
 \subsection{Segunda parte}
@@ -63,7 +65,6 @@ Por esto primero se decidió probar con procesamiento de bandas verticales de la
 Luego se intentó hacer cómputo paralelo de distintas zonas rectangulares de la imagen, una para cada thread. Nuevamente se espera que dependa de la imagen pero de todas formas se espera un tiempo de cómputo para cada thread equilibrado.
 
 Asique por último se implementó cómputo paralelo en donde se tomara a la imagen como un conjunto de rectángulos y donde cada thread se encargara de calcular varios rectángulos pero que pertenezcan a bandas horizontales y verticales distintas.
-COMPLETAAAAR !
 
 
 Primero, para compilar y obtener el ejecutable del programa se usa la siguiente sentencia:
@@ -174,8 +175,35 @@ $ time ./tp2-2014-2-bin -o mejor_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 2
 user	0m0.376s
 \end{verbatim}
 
-Como se ve, en una imagen en donde lo negro y lo blanco está concentrado en bandas verticales distintas tarda más para esa versión porque se debe esperar a que termine el thread que más tarde en computar (que más negro tenga). Mientras que si lo negro está concentrado en bandas horizontales ese gran cómputo se distribuye en distintos threads disminuyendo el tiempo total. Lo mismo aunque de forma invertida se esperaría en el caso contrario cuando se usa la versión de bandas horizontales, pero las pruebas demuestran lo contrario.
-Sin embargo sí podemos decir que el tiempo que tarda en computar el fractal de la imagen mejor_horizontal es mejor en la versión de bandas horizontales que en la de bandas verticales. Y el mismo resultado esperado se da para la otra imagen.
+\begin{table} [htbHp]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}\hline
+Imagen	&Version 2	&Version 3	\\\hline
+mejor\_horizontal.pgm	&0,456 s	&0,548 s	\\\hline
+mejor\_vertical.pgm	&0,376 s	&0,348 s	\\\hline
+\end{tabular}
+\end{center}
+\caption{Valores de tiempo medidos para dos threads}
+\end{table}
+
+Como se ve, en una imagen en donde lo negro y lo blanco está concentrado en bandas verticales distintas tarda más para esa versión porque se debe esperar a que termine el thread que más tarde en computar (que más negro tenga). Mientras que si lo negro está concentrado en bandas horizontales ese gran cómputo se distribuye en distintos threads disminuyendo el tiempo total. Lo mismo aunque de forma invertida se esperaría en el caso contrario cuando se usa la versión de bandas horizontales, pero las pruebas demuestran lo contrario.f
+Sin embargo sí podemos decir que el tiempo que tarda en computar el fractal de la imagen mejor\_horizontal es mejor en la versión de bandas horizontales que en la de bandas verticales. Y el mismo resultado esperado se da para la otra imagen.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{./mejorVertical.png}
+\label{fig:def}
+\caption{Resultado de $./tp2-2014-2-bin -o mejor\_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 2$}
+\end{center}
+\end{figure}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{./mejorHorizontal.png}
+\label{fig:def}
+\caption{Resultado de $./tp2-2014-2-bin -o mejor\_horizontal.pgm -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 2$}
+\end{center}
+\end{figure}
 
 
 
@@ -213,8 +241,21 @@ user	0m0.364s
 Se puede ver como las mejoras no son muy notables, pero sin embargo en comparación con los casos anteriores se ve que esta implementación siempre está dentro de lo aceptable sin ser tener la peor performance pero tampoco la mejor. Esto podemos suponer que se debe a que usa varios threads a la vez y la computadora no puede manejarlos eficientemente.
 
 
-
-
+\begin{table} [htbHp]
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}\hline
+Imagen Default	&\multicolumn{2}{c|}{Version 2}&\multicolumn{2}{c|}{Version 4}\\\hline
+Threads	&generic (s)	&sse (s)	&generic (s)	&sse (s)\\\hline
+1	&0,420	&0,200		&0,423	&0,208		\\\hline
+2	&0,404	&0,168		&	&		\\\hline
+3	&0,420	&		&0,404	&0,200		\\\hline
+5	&	&		&0,440	&0,192		\\\hline
+10	&	&0,192		&	&		\\\hline
+20	&	&0,208		&	&		\\\hline
+\end{tabular}
+\end{center}
+\caption{Valores de tiempo medidos para la imagen default}
+\end{table}
 
 
 
@@ -251,12 +292,13 @@ P2
 \begin{verbatim}
 > ./tp2-2014-2-bin -o por_default.pgm
 \end{verbatim}
-Genera la siguiente imagen:
-\begin{figure}
+Genera la imagen siguiente imagen:
+
+\begin{figure}[H]
 \begin{center}
-\includegraphics[width=0.8\textwidth]{./por_default.png}
-\label{fig:Region barrida por defecto}
-\caption{}
+\includegraphics[width=0.8\textwidth]{./porDefecto.png}
+\label{fig:def}
+\caption{Region barrida por defecto}
 \end{center}
 \end{figure}
 
@@ -266,11 +308,12 @@ Genera la siguiente imagen:
 > ./tp2-2014-2-bin --center -0.6+0.6i --width 0.05 --height 0.05 -o zoom.pgm
 \end{verbatim}
 Genera la siguiente imagen:
-\begin{figure}
+
+\begin{figure}[H]
 \begin{center}
 \includegraphics[width=0.8\textwidth]{./zoom.png}
-\label{fig:Regi\'on comprendida entre -0.625 + 0.625i y -0.575 + 0.575i.}
-\caption{}
+\label{fig:zoom}
+\caption{Regi\'on comprendida entre -0.625 + 0.625i y -0.575 + 0.575i.}
 \end{center}
 \end{figure}
 
@@ -288,7 +331,8 @@ float upper_left_im = +0.30;	/* Extremo superior izquierzo (im). */
 float lower_right_re = -0.55;	/* Extremo inferior derecho (re). */
 float lower_right_im = +0.20;	/* Extremo inferior derecho (im). */
 \end{verbatim}
-\subsubsection{generic_plot2.c}
+
+\subsubsection{generic\_plot2.c}
 \begin{verbatim}
 #include <param2.h>
 
@@ -305,7 +349,7 @@ for (c = 0; c < parms->shades; ++c) {
 	zi = si;
 }
 \end{verbatim}
-\subsubsection{sse_plot2.c}
+\subsubsection{sse\_plot2.c}
 \begin{verbatim}
 #include <param2.h>
 
@@ -388,7 +432,7 @@ typedef struct {
 } param_t;
 \end{verbatim}
 
-\subsubsection{generic_plot3.c}
+\subsubsection{generic\_plot3.c}
 \begin{verbatim}
 #include <param3.h>
 
@@ -436,7 +480,7 @@ for (y = 0; y < parms->y_res; ++y) {
 }
 
 \end{verbatim}
-\subsubsection{sse_plot3.c}
+\subsubsection{sse\_plot3.c}
 \begin{verbatim}
 #include <param3.h>
 
@@ -585,7 +629,7 @@ typedef struct {
 } param_t;
 \end{verbatim}
 
-\subsubsection{generic_plot4.c}
+\subsubsection{generic\_plot4.c}
 \begin{verbatim}
 #include <param4.h>
 
@@ -631,7 +675,7 @@ for (y = parms->y0; y < parms->y1; ++y) {
 }
 
 \end{verbatim}
-\subsubsection{sse_plot4.c}
+\subsubsection{sse\_plot4.c}
 \begin{verbatim}
 #include <param4.h>
 
@@ -685,19 +729,20 @@ __asm__ volatile (
 
 \end{verbatim}
 
-\pagebreak
+
 
 
 \section{Conclusiones}
 
+Al medir los tiempos de cada corrida se hizo en una misma máquina para poder comparar los resultados entre sí. Si se observan los tiempos expuestos en la segunda tabla, se puede ver que la implementación genérica tarda más tiempo en los casos en que se comparan las corridas con poca cantidad de hilos. Esto puede deberse a que, al ser necesario intercambiar una mayor cantidad de hilos, el procesador pierde más tiempo que el que usaría al correrlo normalmente.
+
+Por otro lado, también se puede ver que las implementaciones inline son más eficientes debido a que optimizan el trabajo más de lo que lo haría el compilador.
+
+Al comparar las implementaciones con bandas verticales y horizontales se pudo notar que la eficiencia depende de la distribución del color en la imagen. Determinado método resultará mejor si la cantidad de pixeles blancos y su intencidad son equivalentes en cada segmento de la imagen, los cuales son procesados por distintos threads. Esto quedó demostrado para el caso de las imágenes expuestas.
 
 \pagebreak
 
 \begin{thebibliography}{99}
-
-\bibitem{GXEMUL} GXemul, \url{http://gxemul.sourceforge.net/}
-
-\bibitem{NETBSD} The NetBSD Project, \url{http://www.netbsd.org/}
 
 \bibitem{MANDEL} Mandelbrot, \url{http://en.wikipedia.org/wiki/Mandelbrot\_set/}
 
