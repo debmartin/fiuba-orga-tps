@@ -1,3 +1,13 @@
+<<<<<<< .mine
+# Do not edit -- this file documents how this program was built for your machine.
+SYSTYPE	= LINUX3
+SYSLIBS	= -lpthread -msse
+CC	= gcc $(WARN) -g -DUSE_SSE_ASSEMBLY -msse
+OPT	= -O
+DEBUG	= -g
+EXPORT	= AUXLIBS='' CCARGS='-g -DUSE_SSE_ASSEMBLY -msse' OPT='-O' DEBUG='-g'
+WARN	= -Wall
+=======
 # Do not edit -- this file documents how this program was built for your machine.
 SYSTYPE	= LINUX3
 SYSLIBS	= -lc_p -lpthread
@@ -6,3 +16,4 @@ OPT	= -O
 DEBUG	= -g
 EXPORT	= AUXLIBS='-lc_p' CCARGS='-pg' OPT='-O' DEBUG='-g'
 WARN	= -Wall
+>>>>>>> .r98
