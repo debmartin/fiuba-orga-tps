@@ -64,7 +64,7 @@ El programa recibido del curso implementa programación en paralelo haciendo thr
 Por esto primero se decidió probar con procesamiento de bandas verticales de la imagen, esperando que el resultado no fuera tan distinto y dependiera de la zona a dibujar del fractal.
 Luego se intentó hacer cómputo paralelo de distintas zonas rectangulares de la imagen, una para cada thread. Nuevamente se espera que dependa de la imagen pero de todas formas se espera un tiempo de cómputo para cada thread equilibrado.
 
-Asique por último se implementó cómputo paralelo en donde se tomara a la imagen como un conjunto de rectángulos y donde cada thread se encargara de calcular varios rectángulos pero que pertenezcan a bandas horizontales y verticales distintas.
+Asique por último se buscó implementar cómputo paralelo en donde se tomara a la imagen como un conjunto de rectángulos y donde cada thread se encargara de calcular varios rectángulos pero que pertenezcan a bandas horizontales y verticales distintas. Sin embargo, esto no se pudo lograr sin errores para la fecha.
 
 
 Primero, para compilar y obtener el ejecutable del programa se usa la siguiente sentencia:
@@ -84,110 +84,159 @@ $ make
 \end{verbatim}
 
 
-Para testear performance se usó el comando time que devuelve el tiempo real, de user y de system. Es decir,
-$real$: tiempo desde que se llamó a la función hasta que terminó; esto incluye el tiempo que haya gastado en otros procesos.
-$user$: tiempo de CPU que tarda el proceso especificado en modo de usuario y no kernel.
-$sys$: tiempo de CPU que tarda el proceso especificado en modo kernel.
+Para testear performance se usó profiling con la herramiento gprof y el makefile provisto por la cátedra. Sin embargo se debió hacer un pequeño cambio a la sentencia que decía el archivo USAGE para que funcione.
+Se ejecutó:
+\begin{verbatim}
+$ make -f Makefile.init Makefiles CCARGS="-pg" AUXLIBS="-lc"
 
-Con esto nos importa la parte de cómputo del fractal que es en la cual nos enfocamos en mejorar para obtener un alto SpeedUp por lo que el tiempo $user$ es el que rescataremos de los resultados.
+make -f Makefile.in MAKELEVEL= Makefiles
+(echo "# Do not edit -- this file documents how this program was built for your machine."; /bin/sh makedefs) >makedefs.tmp
+set +e;                                \
+if cmp makedefs.tmp makedefs.out; then \
+    rm makedefs.tmp;                   \
+else                                   \
+    mv makedefs.tmp makedefs.out;      \
+fi >/dev/null 2>/dev/null
+rm -f Makefile; (cat makedefs.out Makefile.in) >Makefile
 
-Luego se probó la versión generic y con la función time se obtuvo lo siguiente.
+$ make
+$ ./tp2-2014-2-bin [Se ejecuta el programa con los parámetros deseados en cada caso.]
+... Esto genera un archivo gmon.out ...
+$ gprof ./tp2-2014-2-bin gmon.out > salida.ext
+... En el archivo salida.ext se tiene la información deseada.
+\end{verbatim}
+
+
+
+Por ejemplo, e probó primero la versión generic sin parámetros extra (las condiciones default) y se obtuvo lo siguiente:
 Para estas corridas se utilizaron las versiones 2 de los archivos que corresponden a los mismos archivos de la cátedra pero para el conjunto de Multibrot de orden 3.
 
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm
+Ejecutando: $ ./tp2-2014-2-bin -o uno.pgm
 
-user	0m0.420s
+Flat profile:
+
+Each sample counts as 0.01 seconds.
+  %   cumulative   self              self     total
+ time   seconds   seconds    calls  Ts/call  Ts/call  name
+100.18      0.27     0.27                             generic_plot
+  0.00      0.27     0.00        1     0.00     0.00  do_method
+  0.00      0.27     0.00        1     0.00     0.00  parse_cmdline
+
+ %         the percentage of the total running time of the
+time       program used by this function.
+
+cumulative a running sum of the number of seconds accounted
+ seconds   for by this function and those listed above it.
+
+ self      the number of seconds accounted for by this
+seconds    function alone.  This is the major sort for this
+           listing.
 \end{verbatim}
 
+Como la parte que apuntamos a mejorar será la de plot, sólo rescataremos ésta información de todas las corridas.
+
+Se volvió a correr la versión generic pero para una resolución del 1000x1000, que requiere más cómputo.
+
+\begin{verbatim}
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000
+
+100.18      0.87     0.87                             generic_plot
+\end{verbatim}
+
+
+Con el gprof no se puede usar el sse, por lo que lo medimos con el comando time para mostrar su mejora.
 Con la versión sse se obtuvo:
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse
+$ time ./tp2-2014-2-bin -o o.pgm -r 1000x1000 -m sse
 
-user	0m0.200s
+real    0m0.479s
+user    0m0.464s
+sys     0m0.012s
 \end{verbatim}
+Con la versión generic se obtuvo:
+\begin{verbatim}
+$ time ./tp2-2014-2-bin -o o.pgm -r 1000x1000
+
+real    0m1.042s
+user    0m1.040s
+sys     0m0.000s
+\end{verbatim}
+donde el tiempo en modo user es el correspondiente al tiempo de cálculo
 
 
-Si se usan por ejemplo dos threads:
+Si se usan por ejemplo diez threads:
 con versión generic
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm -n 2
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 10
+ 96.95      0.30     0.30                             generic_plot
 
-user	0m0.404s
-\end{verbatim}
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 100
+100.18      0.12     0.12                             generic_plot
 
-con versión sse
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 6
+100.18      0.60     0.60                             generic_plot
+
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 36
+100.18      0.13     0.13                             generic_plot
+ \end{verbatim}
+
+
+Pero ya si se usan demasiados threads, esto es contraproductivo al tiempo que le toma al sistema manejar tantos threads del proceso:
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse -n 2
+$ time ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 1000
 
-user	0m0.168s
+100.18      0.71     0.71                             generic_plot
 \end{verbatim}
-
-Pero ya si se usan demasiados threads, esto es contraproductivo al tiempo que le toma al sistema el proceso:
-\begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse -n 10
-
-user	0m0.192s
-
-
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse -n 20
-
-user	0m0.208s
-\end{verbatim}
-
 
 
 
 Más adelante se pensó en probar con bandas verticales en vez de horizontales, esperando que esto dependa de cómo se distribuyan los cálculos en la imagen pero sin poder asegurar nada para cualquier caso general.
 Para esto se usó la versión 3 de todos los archivos.
 
-Para 3 threads,
+Para 10 threads,
 \begin{verbatim}
-time ./tp2-2014-2-bin -o uno.pgm -n 3
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 10
 
-user	0m0.420s
+100.18      0.33     0.33                             generic_plot
 \end{verbatim}
 
 como el caso visto.
-Pero veamos dos nuevas imagénes y comparemos mejor
+Pero veamos dos nuevas imagénes determinadas y comparemos mejor
 
 Versión 3: (Bandas verticales)
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o mejor_horizontal.pgm -c -0.5520+0.2001i -n 2
+$ ./tp2-2014-2-bin -o mejor_horizontal.pgm -r 1000x1000 -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 10
+98.25      0.51     0.51                             generic_plot
+ 1.93      0.52     0.01                             main
 
-user	0m0.548s
-
-
-$ time ./tp2-2014-2-bin -o mejor_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 2
-
-user	0m0.348s
+$ ./tp2-2014-2-bin -o mejor_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 10 -r 1000x1000
+100.18      0.21     0.21                             generic_plot
 \end{verbatim}
 
 Versión 2: (Bandas horizontales)
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o mejor_horizontal.pgm -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 2
+$ ./tp2-2014-2-bin -o mejor_horizontal.pgm -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 10 -r 1000x1000
+100.18      0.31     0.31                             generic_plot
 
-user	0m0.456s
-
-
-$ time ./tp2-2014-2-bin -o mejor_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 2
-
-user	0m0.376s
+$ ./tp2-2014-2-bin -o mejor_vertical.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 10 -r 1000x1000
+100.18      0.55     0.55                             generic_plot
+  8.35      0.34     0.02                             main
 \end{verbatim}
 
 \begin{table} [htbHp]
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}\hline
 Imagen	&Version 2	&Version 3	\\\hline
-mejor\_horizontal.pgm	&0,456 s	&0,548 s	\\\hline
-mejor\_vertical.pgm	&0,376 s	&0,348 s	\\\hline
+mejor\_horizontal.pgm	&0,31 s	&0,51 s	\\\hline
+mejor\_vertical.pgm	&0,55 s	&0,21 s	\\\hline
 \end{tabular}
 \end{center}
 \caption{Valores de tiempo medidos para dos threads}
 \end{table}
 
-Como se ve, en una imagen en donde lo negro y lo blanco está concentrado en bandas verticales distintas tarda más para esa versión porque se debe esperar a que termine el thread que más tarde en computar (que más negro tenga). Mientras que si lo negro está concentrado en bandas horizontales ese gran cómputo se distribuye en distintos threads disminuyendo el tiempo total. Lo mismo aunque de forma invertida se esperaría en el caso contrario cuando se usa la versión de bandas horizontales, pero las pruebas demuestran lo contrario.f
-Sin embargo sí podemos decir que el tiempo que tarda en computar el fractal de la imagen mejor\_horizontal es mejor en la versión de bandas horizontales que en la de bandas verticales. Y el mismo resultado esperado se da para la otra imagen.
+Como se ve, en una imagen en donde lo negro y lo blanco está concentrado en bandas verticales distintas tarda más para esa versión porque se debe esperar a que termine el thread que más tarde en computar (que más negro tenga). Mientras que si lo negro está concentrado en bandas horizontales ese gran cómputo se distribuye en distintos threads disminuyendo el tiempo total. Lo mismo aunque de forma invertida ocurre en el caso contrario cuando se usa la versión de bandas horizontales.
+Se puede ver que el tiempo que tarda en computar el fractal de la imagen mejor\_horizontal es mejor en la versión de bandas horizontales que en la de bandas verticales. Y el mismo resultado esperado se da para la otra imagen con la otra versión.
 
 \begin{figure}[H]
 \begin{center}
@@ -210,54 +259,53 @@ Sin embargo sí podemos decir que el tiempo que tarda en computar el fractal de 
 Finalmente se ideó una versión donde la imagen se divida en rectángulos, la cantidad es según especifique el usuario, y se le asigna un thread a cada uno.
 Corresponde a la versión 4 de los archivos.
 
-
 \begin{verbatim}
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse
-user	0m0.208s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 10x10
+100.17      0.58     0.58                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm
-user	0m0.423s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 10x100
+100.17      0.78     0.78                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse -n 2x3
-user	0m0.200s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 3x3
+100.17      0.55     0.55                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm -n 2x3
-user	0m0.404s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 2x3
+100.17      0.70     0.70                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm -m sse -n 3x5
-user	0m0.192s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -n 12x3
+100.17      0.37     0.37                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm -n 3x5 
-user	0m0.440s
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 12x3
+100.17      0.19     0.19                             generic_plot
 
-$ time ./tp2-2014-2-bin -o uno.pgm -c -0.5520+0.2001i -H 0.5 -w 0.5 -n 2x2
-user	0m0.520s
-
-$ time ./tp2-2014-2-bin -o uno.pgm -c -0.015+1.2i -H 0.5 -w 0.5 -n 2x2
-user	0m0.364s
-
+$ ./tp2-2014-2-bin -o uno.pgm -r 1000x1000 -c -0.015+1.2i -H 0.5 -w 0.5 -n 12x3
+100.17      0.22     0.22                             generic_plot
 \end{verbatim}
-
-Se puede ver como las mejoras no son muy notables, pero sin embargo en comparación con los casos anteriores se ve que esta implementación siempre está dentro de lo aceptable sin ser tener la peor performance pero tampoco la mejor. Esto podemos suponer que se debe a que usa varios threads a la vez y la computadora no puede manejarlos eficientemente.
-
 
 \begin{table} [htbHp]
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}\hline
 Imagen Default	&\multicolumn{2}{c|}{Version 2}&\multicolumn{2}{c|}{Version 4}\\\hline
-Threads	&generic (s)	&sse (s)	&generic (s)	&sse (s)\\\hline
-1	&0,420	&0,200		&0,423	&0,208		\\\hline
-2	&0,404	&0,168		&	&		\\\hline
-3	&0,420	&		&0,404	&0,200		\\\hline
-5	&	&		&0,440	&0,192		\\\hline
-10	&	&0,192		&	&		\\\hline
-20	&	&0,208		&	&		\\\hline
+Threads	&generic (s)	&generic (s) \\\hline
+10 (y 9)  &0,30	&0,55\\\hline
+100  &0,12  & 0,58 \\\hline
+1000  &0,71	& 0,78 \\\hline
+6 & 0,6  &0,7 \\\hline
+36	& 0,13 &0,37﻿ \\\hline
 \end{tabular}
 \end{center}
 \caption{Valores de tiempo medidos para la imagen default}
 \end{table}
 
 
+Se puede ver como no hay mejoras visibles. Sin embargo la idea de esta implementación era balancear los cómputos.
+Para no caer en la dependencia de la zona del fractal a imprimir como en el caso de las bandas lo que en verdad se quería
+era ir un paso más adelante de esta implementación que era: una vez logrado dividir la imagen en rectángulos, crear tantos
+threads como columnas o filas en las que se haya dividido la imagen, y asignarle a cada thread una secuencia de rectángulos
+a computar, pero siendo que en su conjunto haya todos rectángulos que correspondan a bandas distintas. Así las distintas
+zonas de la imagen se repartían en los distintos threads, siendo estos una cantidad razonable a diferencia de uno por
+rectángulo. Finalmente, no se pude llevar a cabo esta idea. Se empezó en los archivos versión 5 pero no se pudo superar 
+y resolver un segmentation fault.
 
 
 
@@ -313,7 +361,7 @@ Genera la siguiente imagen:
 \begin{center}
 \includegraphics[width=0.8\textwidth]{./zoom.png}
 \label{fig:zoom}
-\caption{Regi\'on comprendida entre -0.625 + 0.625i y -0.575 + 0.575i.}
+\caption{Regi\'on comprendida entre -0.65 + 0.30i y -0.55 + 0.20i.}
 \end{center}
 \end{figure}
 
