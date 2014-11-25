@@ -1,0 +1,465 @@
+ 1: /*
+ 2:  * 00-add.txt
+ 3:  *
+ 4:  * Recibe dos números por línea de comando, hace la suma, e imprime
+ 5:  * el resultado de la operación por salida estándar. Compilar con -g.
+ 6:  *
+ 7:  * $Date: 2008/06/10 19:03:22 $
+ 8:  */
+ 9: 
+10: #include <stdio.h>
+11: #include <stdlib.h>
+12: 
+13: int
+14: main(int argc, char * const argv[])
+15: {
+16: 	int i;
+17: 	int j;
+18: 	int k;
+19: 	char c;
+20: 
+21: 	if (argc != 3)
+22: 		exit(1);
+23: 
+24: 	if (sscanf(argv[1], "%d%c", &i, &c) != 1
+25: 	    || sscanf(argv[2], "%d%c", &j, &c) != 1)
+26: 		exit(1);
+27: 
+28: 	/*
+29: 	 * Pasaje de los argumentos de entrada por registros.
+30: 	 */
+31: 	__asm__ volatile (
+32: 		"movl %1, %0\n\t"
+33: 		"addl %2, %0\n\t"
+34: 	: "=g" (k)
+35: 	: "r" (i), "r" (j) 
+36: 	);
+37: 
+38: 	printf("(1) %d + %d = %d\n", i, j, k);
+39: 
+40: 	/*
+41: 	 * Observar que, en este caso, el pasaje de argumentos
+42: 	 * se hace usando operandos en memoria. Ver el código
+43: 	 * assembler resultante.
+44: 	 */
+45: 	__asm__ volatile (
+46: 		"movl %1, %0\n\t"
+47: 		"addl %2, %0\n\t"
+48: 	: "=r" (k)
+49: 	: "m" (i), "m" (j) 
+50: 	);
+51: 
+52: 	printf("(2) %d + %d = %d\n", i, j, k);
+53: 
+54: 	return 0;
+55: }
+
+$ cc -g -o 00-add 00-add.c
+$ 00-add 2 4
+(1) 2 + 4 = 6
+(2) 2 + 4 = 6
+
+$ objdump -S -f .text 00-add
+...
+	/*
+	 * Pasaje de los argumentos de entrada por registros.
+	 */
+	__asm__ volatile (
+ 804847a:	8b 55 fc             	mov    0xfffffffc(%ebp),%edx
+ 804847d:	8b 45 f8             	mov    0xfffffff8(%ebp),%eax
+ 8048480:	89 55 f4             	mov    %edx,0xfffffff4(%ebp)
+ 8048483:	01 45 f4             	add    %eax,0xfffffff4(%ebp)
+		"movl %1, %0\n\t"
+		"addl %2, %0\n\t"
+	: "=g" (k)
+	: "r" (i), "r" (j) 
+	);
+
+	printf("(1) %d + %d = %d\n", i, j, k);
+ 8048486:	8b 45 f4             	mov    0xfffffff4(%ebp),%eax
+ 8048489:	89 44 24 0c          	mov    %eax,0xc(%esp)
+ 804848d:	8b 45 f8             	mov    0xfffffff8(%ebp),%eax
+ 8048490:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 8048494:	8b 45 fc             	mov    0xfffffffc(%ebp),%eax
+ 8048497:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 804849b:	c7 04 24 f9 85 04 08 	movl   $0x80485f9,(%esp)
+ 80484a2:	e8 51 fe ff ff       	call   80482f8 <_init+0x38>
+
+	/*
+	 * Observar que, en este caso, el pasaje de argumentos
+	 * se hace usando operandos en memoria. Ver el código
+	 * assembler resultante.
+	 */
+	__asm__ volatile (
+ 80484a7:	8b 45 fc             	mov    0xfffffffc(%ebp),%eax
+ 80484aa:	03 45 f8             	add    0xfffffff8(%ebp),%eax
+ 80484ad:	89 45 f4             	mov    %eax,0xfffffff4(%ebp)
+		"movl %1, %0\n\t"
+		"addl %2, %0\n\t"
+	: "=r" (k)
+	: "m" (i), "m" (j) 
+	);
+
+	printf("(2) %d + %d = %d\n", i, j, k);
+ 80484b0:	8b 45 f4             	mov    0xfffffff4(%ebp),%eax
+ 80484b3:	89 44 24 0c          	mov    %eax,0xc(%esp)
+ 80484b7:	8b 45 f8             	mov    0xfffffff8(%ebp),%eax
+ 80484ba:	89 44 24 08          	mov    %eax,0x8(%esp)
+ 80484be:	8b 45 fc             	mov    0xfffffffc(%ebp),%eax
+ 80484c1:	89 44 24 04          	mov    %eax,0x4(%esp)
+ 80484c5:	c7 04 24 0b 86 04 08 	movl   $0x804860b,(%esp)
+ 80484cc:	e8 27 fe ff ff       	call   80482f8 <_init+0x38>
+...
+ 
+ 1: /*
+ 2:  * 02-eflags2.c
+ 3:  *
+ 4:  * Similar a eflags1.c; salvo que, en este caso, recibimos dos
+ 5:  * parámetros por línea de comando, los comparamos, y mostramos
+ 6:  * cómo influye la comparación en EFLAGS.
+ 7:  *
+ 8:  * $Date: 2008/06/10 19:03:22 $
+ 9:  */
+10: 
+11: #include <stdio.h>
+12: #include <stdint.h>
+13: #include <stdlib.h>
+14: 
+15: int
+16: main(int argc, char * const argv[])
+17: {
+18: 	int i;
+19: 	int j;
+20: 	char c;
+21: 	uint32_t r;
+22: 
+23: 	if (argc != 3)
+24: 		exit(1);
+25: 
+26: 	if (sscanf(argv[1], "%d%c", &i, &c) != 1
+27: 	    || sscanf(argv[2], "%d%c", &j, &c) != 1)
+28: 		exit(1);
+29: 
+30: 	__asm__ volatile (
+31: 		"cmp    %1, %2 \n\t"
+32: 		"pushfl        \n\t"
+33: 		"popl   %0     \n\t"
+34: 	: "=g" (r)
+35: 	: "r" (i), "r" (j)
+36: 	: "cc"
+37: 	);
+38: 
+39: #define BIT(r, i) ((r) & (1 << (i)) ? 1 : 0)
+40: 	printf("eflags: 0x%08x\n", r);
+41: 	printf("carry: %d\n", BIT(r, 0));
+42: 	printf("1: %d\n", BIT(r, 1));
+43: 	printf("0: %d\n", BIT(r, 3));
+44: 	printf("0: %d\n", BIT(r, 5));
+45: 	printf("zero: %d\n", BIT(r, 6));
+46: 	printf("sign: %d\n", BIT(r, 7));
+47: 	printf("interrupt enable: %d\n", BIT(r, 9));
+48: 	printf("i/o privilege level: %d\n", (r >> 12) & 3);
+49: 	printf("virtual-8086 mode: %d\n", BIT(r, 17));
+50: 	printf("alignment check: %d\n", BIT(r, 18));
+51: 	printf("id: %d\n", BIT(r, 21));
+52: 	
+53: 	return 0;
+54: }
+
+$ cc -g -o 02-eflags2 02-eflags2.c
+$ 
+$ 02-eflags2 0 0
+eflags: 0x00000246
+carry: 0
+1: 1
+0: 0
+0: 0
+zero: 1
+sign: 0
+interrupt enable: 1
+i/o privilege level: 0
+virtual-8086 mode: 0
+alignment check: 0
+id: 0
+$ 02-eflags2 1 0
+eflags: 0x00000297
+carry: 1
+1: 1
+0: 0
+0: 0
+zero: 0
+sign: 1
+interrupt enable: 1
+i/o privilege level: 0
+virtual-8086 mode: 0
+alignment check: 0
+id: 0
+$ 02-eflags2 0 1
+eflags: 0x00000202
+carry: 0
+1: 1
+0: 0
+0: 0
+zero: 0
+sign: 0
+interrupt enable: 1
+i/o privilege level: 0
+virtual-8086 mode: 0
+alignment check: 0
+id: 0
+$ 02-eflags2 5 5
+eflags: 0x00000246
+carry: 0
+1: 1
+0: 0
+0: 0
+zero: 1
+sign: 0
+interrupt enable: 1
+i/o privilege level: 0
+virtual-8086 mode: 0
+alignment check: 0
+id: 0
+ 
+ 1: /*
+ 2:  * 05-loop1a.c
+ 3:  *
+ 4:  * Calcula e imprime los diez primeros cuadrados, empezando desde 0.
+ 5:  *
+ 6:  * $Date: 2008/06/10 19:03:22 $
+ 7:  */
+ 8: 
+ 9: #include <stdio.h>
+10: 
+11: int
+12: main(int argc, char * const argv[])
+13: {
+14: 	int i;
+15: 	int j;
+16: 
+17: 	for (i = 0; i < 10; ++i) {
+18: 		__asm__ volatile (
+19: 			"movl %1, %%eax\n\t"
+20: 			"mull %1       \n\t"
+21: 			"movl %%eax, %0\n\t"
+22: 		: "=g" (j)
+23: 		: "g" (i)
+24: 		: "cc", "eax", "edx" /* Ojo: mull usa %edx:%eax. */
+25: 		);
+26: 		printf("%d^2 = %d\n", i, j);
+27: 	}
+28: 
+29: 	return 0;
+30: }
+
+$ cc -g -o 05-loop1a 05-loop1a.c
+$ 05-loop1a
+0^2 = 0
+1^2 = 1
+2^2 = 4
+3^2 = 9
+4^2 = 16
+5^2 = 25
+6^2 = 36
+7^2 = 49
+8^2 = 64
+9^2 = 81
+
+$ objdump -S -j .text 05-loop1a
+...
+	for (i = 0; i < 10; ++i) {
+ 8048394:	c7 45 fc 00 00 00 00 	movl   $0x0,0xfffffffc(%ebp)
+ 804839b:	83 7d fc 09          	cmpl   $0x9,0xfffffffc(%ebp)
+ 804839f:	7e 02                	jle    80483a3 <main+0x1f>
+ 80483a1:	eb 2a                	jmp    80483cd <main+0x49>
+		__asm__ volatile (
+ 80483a3:	8b 45 fc             	mov    0xfffffffc(%ebp),%eax
+ 80483a6:	f7 65 fc             	mull   0xfffffffc(%ebp)
+ 80483a9:	89 45 f8             	mov    %eax,0xfffffff8(%ebp)
+			"movl %1, %%eax\n\t"
+			"mull %1       \n\t"
+			"movl %%eax, %0\n\t"
+		: "=g" (j)
+		: "g" (i)
+		: "cc", "eax", "edx" /* Ojo: mull usa %edx:%eax. */
+		);
+		printf("%d^2 = %d\n", i, j);
+
+ 1: /*
+ 2:  * 09-loop4.c
+ 3:  *
+ 4:  * loop4.c: similar a loop2.c y loop3.c, pero con el bug corregido,
+ 5:  * y usando modo de direccionamiento base + registro * ancho + offset.
+ 6:  *
+ 7:  * $Date: 2008/06/10 19:03:22 $
+ 8:  */
+ 9: 
+10: #include <stdio.h>
+11: #include <stdlib.h>
+12: 
+13: #ifndef N
+14: #define N 13
+15: #endif
+16: 
+17: int
+18: main(int argc, char * const argv[])
+19: {
+20: 	int i;
+21: 	int v[N];
+22: 
+23: 	__asm__ volatile (
+24: 		"init:                      \n\t"
+25: 		"xorl %%ebx, %%ebx          \n\t" /* ebx: loop counter. */
+26: 		
+27: 		"loop:                      \n\t"
+28: 		"cmpl %1, %%ebx             \n\t"
+29: 		"jge  fin                   \n\t"
+30: 
+31: 		"body:                      \n\t"
+32: 		"movl %%ebx, %%eax          \n\t"
+33: 		"mull %%eax                 \n\t"
+34: 		"movl %%eax, (%0, %%ebx, 4) \n\t" /* address: %0 + 4 * ebx. */
+35: 
+36: 		"incr:                      \n\t"
+37: 		"incl %%ebx                 \n\t"
+38: 		"jmp  loop                  \n\t"
+39: 		
+40: 		"fin:                       \n\t"
+41: 	:
+42: 	: "g" (v), "i" (N)
+43: 	: "eax", "ebx", "ecx", "edx", "cc", "memory"
+44: 	);
+45: 
+46: 	for (i = 0; i < N; ++i)
+47: 		printf("%d^2 = %d\n", i, v[i]);
+48: 
+49: 	return 0;
+50: }
+
+$ cc -g -o 09-loop4 09-loop4.c
+$ 09-loop4
+0^2 = 0
+1^2 = 1
+2^2 = 4
+3^2 = 9
+4^2 = 16
+5^2 = 25
+6^2 = 36
+7^2 = 49
+8^2 = 64
+9^2 = 81
+10^2 = 100
+11^2 = 121
+12^2 = 144
+
+ 1: /*
+ 2:  * 12-addps.c
+ 3:  * 
+ 4:  * Incrementa e imprime los 4 argumentos de punto flotante, usando
+ 5:  * instrucciones SIMD SSE para hacer las 4 operaciones con una sola
+ 6:  * instrucción.
+ 7:  *
+ 8:  * $Date: 2008/06/10 19:03:22 $
+ 9:  */
+10: 
+11: #include <stdio.h>
+12: #include <stdlib.h>
+13: 
+14: int
+15: main(int argc, char * const argv[])
+16: {
+17: 	float X[4] __attribute__ ((aligned (16)));
+18: 	float Y[4] __attribute__ ((aligned (16)));
+19: 	float Z[4] __attribute__ ((aligned (16)));
+20: 	char c;
+21: 
+22: 	if (argc != 5)
+23: 		exit(1);
+24: 
+25: 	X[0] = X[1] = X[2] = X[3] = 0.0f;
+26: 	Y[0] = Y[1] = Y[2] = Y[3] = 1.0f;
+27: 
+28: 	if (sscanf(argv[1], "%f %c", X + 0, &c) != 1
+29: 	    || sscanf(argv[2], "%f %c", X + 1, &c) != 1
+30: 	    || sscanf(argv[3], "%f %c", X + 2, &c) != 1
+31: 	    || sscanf(argv[4], "%f %c", X + 3, &c) != 1)
+32: 		exit(1);
+33: 
+34: 	__asm__ volatile (
+35: 		"movaps  %1, %%xmm0 \n\t"
+36: 		"addps   %2, %%xmm0 \n\t"
+37: 		"movaps  %%xmm0, %0 \n\t"
+38: 	: "=m" (Z) /* Ojo: usar Z, no *Z. ¿Por qué? */
+39: 	: "m" (*X), "m" (*Y) 
+40: 	: "xmm0"
+41: 	);
+42: 
+43: 	printf("%f %f %f %f\n", Z[0], Z[1], Z[2], Z[3]);
+44: 
+45: 	return 0;
+46: }
+
+$ cc -g -o 12-addps 12-addps.c
+$ 12-addps 0 0 0 0
+1.000000 1.000000 1.000000 1.000000
+$ 12-addps 1 4 -1 10
+2.000000 5.000000 0.000000 11.000000
+ 
+ 1: /*
+ 2:  * 13-cmpps-cmpltps.c
+ 3:  * 
+ 4:  * Usamos cmpltps para comparar dos números de punto flotante,
+ 5:  * pasados por línea de comando. Luego, imprimimos el resultado
+ 6:  * por salida estándar.
+ 7:  *
+ 8:  * $Date: 2008/06/10 19:03:22 $
+ 9:  */
+10: 
+11: #include <stdio.h>
+12: #include <stdlib.h>
+13: 
+14: int
+15: main(int argc, char * const argv[])
+16: {
+17: 	float X[4] __attribute__ ((aligned (16)));
+18: 	float Y[4] __attribute__ ((aligned (16)));
+19: 	float Z[4] __attribute__ ((aligned (16)));
+20: 	char c;
+21: 
+22: 	if (argc != 3)
+23: 		exit(1);
+24: 
+25: 	if (sscanf(argv[1], "%f%c", X, &c) != 1
+26: 	    || sscanf(argv[2], "%f%c", Y, &c) != 1)
+27: 		exit(1);
+28: 
+29: 	X[1] = X[2] = X[3] = 0.0f;
+30: 	Y[1] = Y[2] = Y[3] = 0.0f;
+31: 	Z[0] = -1.0f;
+32: 
+33: 	__asm__ volatile (
+34: 		"movaps  %1, %%xmm0 \n\t"
+35: 		"cmpltps %2, %%xmm0 \n\t"
+36: 		"movaps  %%xmm0, %0 \n\t"
+37: 	: "=m" (Z) /* Ojo: usar Z, no *Z. ¿Por qué? */
+38: 	: "m" (*X), "m" (*Y) 
+39: 	: "xmm0"
+40: 	);
+41: 
+42: 	printf("%f vs. %f => 0x%08lx\n",
+43: 	       (double) X[0],
+44: 	       (double) Y[0],
+45: 	       *(unsigned long *) ((void *) Z));
+46: 
+47: 	return 0;
+48: }
+
+$ cc -g -o 13-cmpps-cmpltps 13-cmpps-cmpltps.c
+$ 13-cmpps-cmpltps 1 2
+1.000000 vs. 2.000000 => 0xffffffff
+$ 13-cmpps-cmpltps -1 1
+-1.000000 vs. 1.000000 => 0xffffffff
+$ 13-cmpps-cmpltps 4 4
+4.000000 vs. 4.000000 => 0x00000000
+$ 13-cmpps-cmpltps -0 +0
+-0.000000 vs. 0.000000 => 0x00000000
